@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\TheCarMagazinAPI.props" />
+</Project>

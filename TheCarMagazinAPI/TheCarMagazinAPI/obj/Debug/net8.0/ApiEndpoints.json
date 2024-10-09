@@ -1,0 +1,91 @@
+[
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetCarBrands",
+    "RelativePath": "api/Forum/brands",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "Login",
+    "RelativePath": "api/Forum/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "TheCarMagazinAPI.Models.UserLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetCarModels",
+    "RelativePath": "api/Forum/models/{brand}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "Register",
+    "RelativePath": "api/Forum/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "TheCarMagazinAPI.Models.UserRegistrationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetForumTopics",
+    "RelativePath": "api/Forum/topics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetCarYears",
+    "RelativePath": "api/Forum/years/{brand}/{model}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "model",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

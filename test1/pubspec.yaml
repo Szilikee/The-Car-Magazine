@@ -1,0 +1,58 @@
+name: my_car_forum
+description: A simple car forum web application.
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.0
+  video_player: ^2.9.1  # Ellenőrizd a legfrissebb verziót
+  shared_preferences: ^2.3.2
+  flutter_cache_manager: ^3.3.1
+  #flutter_animated_card_list: ^1.0.0 # Make sure to use the latest version available
+  http: ^0.13.6
+  intl: ^0.17.0
+
+dev_dependencies:
+  flutter_lints: ^2.0.0 # Ellenőrizd a legfrissebb verziót
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/pictures/intro.jpg
+    - assets/pictures/card1.jpg
+    - assets/pictures/card2.jpg
+    - assets/pictures/card3.jpg
+    - assets/pictures/card4.jpg
+    - assets/pictures/car1.jpg
+    - assets/pictures/car2.jpg
+    - assets/pictures/car3.jpg
+    - assets/pictures/car4.jpg
+    - assets/pictures/electric_cars.jpg
+    - assets/pictures/suvs.jpg
+    - assets/pictures/car_of_the_year.jpg
+    - assets/pictures/honda_prelude.jpg      # Feature cikk kép
+    - assets/pictures/mclaren_hypercar.jpg   # Cikk grid kép 1
+    - assets/pictures/bmw_z4.jpg             # Cikk grid kép 2
+    - assets/pictures/mustang_f100.jpg       # Cikk grid kép 3
+    - assets/pictures/hummer_rivian.jpg      # Cikk grid kép 4
+    - assets/pictures/toyota_suv.jpg
+    - assets/pictures/ferrari_suv.jpg
+    - assets/pictures/porsche_gt3rs.jpg      # Új cikk 1
+    - assets/pictures/tesla_cybertruck.jpg   # Új cikk 2
+    - assets/pictures/audi_a9.jpg            # Új cikk 3
+    - assets/pictures/bronco_raptor.jpg      # Új cikk 4
+    - assets/pictures/lamborghini_revuelto.jpg  # Új cikk 5
+    - assets/pictures/jeep_grand_cherokee.jpg   # Új cikk 6
+    - assets/pictures/logo.png
+    - assets/pictures/ferrari_future.jpg
+    - assets/pictures/bmw_i8.jpg
+    - assets/pictures/tesla_roadster.jpg
+    - assets/pictures/lamborghini_aventador.jpg
+    
+
+
+
