@@ -21,7 +21,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 348,
+          "DockedWidth": 229,
           "SelectedChildIndex": 4,
           "Children": [
             {
@@ -56,7 +56,7 @@
               "RelativeDocumentMoniker": "TheCarMagazinAPI\\Controllers\\ForumController.cs",
               "ToolTip": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Controllers\\ForumController.cs",
               "RelativeToolTip": "TheCarMagazinAPI\\Controllers\\ForumController.cs",
-              "ViewState": "AgIAAGEAAAAAAAAAAAAmwHEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-08T17:58:09.948Z",
               "EditorCaption": ""

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TheCarMagazinAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+578a336c1ccac79558a2a1604d2802058936c5d8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+89ac26fbe4c2eb55ce371f033815b4685ffdc270")]
 [assembly: System.Reflection.AssemblyProductAttribute("TheCarMagazinAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TheCarMagazinAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
