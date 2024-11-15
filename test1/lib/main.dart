@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'ProfilePage.dart';
 import 'ForumPage.dart';
 import 'Marketplace.dart';
+import 'AccountPage.dart';
 
 
 void main() {

@@ -10,13 +10,14 @@ dependencies:
   provider: ^6.0.0
   video_player: ^2.9.1  # Ellenőrizd a legfrissebb verziót
   shared_preferences: ^2.3.2
-  flutter_cache_manager: ^3.3.1
+  flutter_cache_manager: ^3.4.1
   #flutter_animated_card_list: ^1.0.0 # Make sure to use the latest version available
-  http: ^0.13.6
-  intl: ^0.17.0
+  http: ^1.2.2
+  intl: ^0.20.0
+  image_picker: ^0.8.5+3 # Legújabb stabil verzió
 
 dev_dependencies:
-  flutter_lints: ^2.0.0 # Ellenőrizd a legfrissebb verziót
+  flutter_lints: ^5.0.0 # Ellenőrizd a legfrissebb verziót
 
 
 flutter:

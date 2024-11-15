@@ -69,6 +69,38 @@
   },
   {
     "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetUserDetails",
+    "RelativePath": "api/Forum/userdetails/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "UpdateUserDetails",
+    "RelativePath": "api/Forum/userdetails/update",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "user",
+        "Type": "TheCarMagazinAPI.Models.User",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
     "Method": "GetCarYears",
     "RelativePath": "api/Forum/years/{brand}/{model}",
     "HttpMethod": "GET",
