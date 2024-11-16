@@ -14,7 +14,8 @@ dependencies:
   #flutter_animated_card_list: ^1.0.0 # Make sure to use the latest version available
   http: ^1.2.2
   intl: ^0.20.0
-  image_picker: ^0.8.5+3 # Legújabb stabil verzió
+  image_picker: ^1.1.2 # Legújabb stabil verzió
+  html: ^0.15.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0 # Ellenőrizd a legfrissebb verziót

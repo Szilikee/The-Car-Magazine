@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_car_forum/main.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'AccountPage.dart';
-import 'main.dart';  // A HomePage-t kell importálni, ha onnan jössz vissza
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _checkLoginStatus();
   }
 
+
   // Check if the user is logged in
   Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,11 +45,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  
+
   // Fetch User Data from the API
   Future<void> _fetchUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final userId = prefs.getInt('userId');  // Feltételezve, hogy elmentettük
+    final userId = prefs.getInt('userID');  // Feltételezve, hogy elmentettük
 
     if (token != null && token.isNotEmpty && userId != null) {
       final response = await http.get(
@@ -157,64 +160,87 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Registration function
   Future<void> _registerUser() async {
-    final username = _usernameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+  final username = _usernameController.text.trim();
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
 
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
-      );
-      return;
-    }
+  // Email validálása
+  final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+  if (!emailRegex.hasMatch(email)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please enter a valid email address (e.g. example@domain.com).')),
+    );
+    return;
+  }
 
-    try {
-      final response = await http.post(
-        Uri.parse('https://localhost:7164/api/Forum/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'username': username,
-          'email': email,
-          'password': password,
-        }),
-      );
+  // Ellenőrzés, hogy a domain rész .com végződésű-e
+  if (!email.endsWith('.com')) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Email must end with .com')),
+    );
+    return;
+  }
 
-      if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
+  if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in all fields.')),
+    );
+    return;
+  }
 
-        if (responseData.containsKey('token') && responseData.containsKey('userId')) {
-          final token = responseData['token'];
-          final userId = responseData['userId'];
+  try {
+    final response = await http.post(
+      Uri.parse('https://localhost:7164/api/Forum/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+    );
 
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
-          await prefs.setInt('userId', userId);
+    if (response.statusCode == 201) {
+      final responseData = json.decode(response.body);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful!')),
-          );
+      if (responseData.containsKey('token') && responseData.containsKey('userId')) {
+        final token = responseData['token'];
+        final userId = responseData['userId'];
 
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-            (Route<dynamic> route) => false,
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid server response. Missing Token or UserID.')),
-          );
-        }
-      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setInt('userId', userId);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${response.body}')),
+          const SnackBar(content: Text('Registration successful!')),
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+          Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (Route<dynamic> route) => false,
         );
       }
-    } catch (error) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Network error: $error')),
+        SnackBar(content: Text('Registration failed: ${response.body}')),
       );
     }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Network error: $error')),
+    );
   }
+}
+
 
   // Login function
   Future<void> _loginUser() async {
@@ -240,11 +266,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
         if (responseData.containsKey('token') && responseData.containsKey('userID')) {
           final token = responseData['token'];
-          final userID = responseData['userID'];
+          final userId = responseData['userID'];
 
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
-          await prefs.setInt('userID', userID);
+          await prefs.setInt('userId', userId);
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Login successful!')),
@@ -267,12 +293,32 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $error')),
+        SnackBar(content: Text('Network error: $error')),
       );
     }
   }
 
-  // Toggle between Register/Login
+  // Logout function
+  Future<void> _logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('userId');
+    setState(() {
+      _isLoggedIn = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Logged out successfully')),
+    );
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfilePage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  // Switch between login and register
   Widget _buildToggleAuthButton() {
     return TextButton(
       onPressed: () {
@@ -281,29 +327,9 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       },
       child: Text(
-        _isRegistering ? 'Already have an account? Login' : 'Don\'t have an account? Register',
-        style: const TextStyle(color: Colors.lightBlueAccent),
+        _isRegistering ? 'Already have an account? Login' : 'Need an account? Register',
+        style: const TextStyle(color: Colors.white),
       ),
-    );
-  }
-
-  // Logout function
-  Future<void> _logoutUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('userID');
-    await prefs.remove('username');
-    await prefs.remove('email');
-    await prefs.remove('profileImage');
-
-    setState(() {
-      _isLoggedIn = false;
-    });
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-      (Route<dynamic> route) => false,
     );
   }
 }

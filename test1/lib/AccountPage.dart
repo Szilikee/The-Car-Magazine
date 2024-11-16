@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'main.dart';
 
 class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
+  const AccountPage({Key? key}) : super(key: key);
 
   @override
   _AccountPageState createState() => _AccountPageState();
@@ -18,45 +18,27 @@ class _AccountPageState extends State<AccountPage> {
   String _profileImageUrl = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
   String _bio = '';
   String _status = 'Aktív';
-  int _createdTopicsCount = 0;
-  String _lastLogin = 'N/A';
   final _picker = ImagePicker();
-
-  final TextEditingController _oldPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _statusController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
+Future<void> _loadUserData() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('token');
+  int? userId = prefs.getInt('userId');
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    int? userId = prefs.getInt('userId');  // Ellenőrizd, hogy van userId
-
-    if (token == null || token.isEmpty || userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not logged in.')),
-      );
-      return;
-    }
-
-    setState(() {
-      _username = prefs.getString('username') ?? 'Guest';
-      _email = prefs.getString('email') ?? 'No email';
-      _profileImageUrl = prefs.getString('profileImage') ?? 'https://via.placeholder.com/150';
-    });
-
-    _fetchUserDetails(); // Kéred a felhasználói adatokat
+  if (token == null || token.isEmpty || userId == null) {
+    _showSnackBar('User not logged in.');
+    return;
   }
 
-  Future<void> _fetchUserDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final userId = prefs.getInt('userId');
-
+  try {
+    // Get user details from the API or load from the local storage
     final response = await http.get(
       Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
       headers: {
@@ -65,47 +47,78 @@ class _AccountPageState extends State<AccountPage> {
       },
     );
 
+    print('Response Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
+        _username = data['username'] ?? 'Guest';
+        _email = data['email'] ?? 'No email';
+        _profileImageUrl = data['profileImageUrl'] ?? _profileImageUrl;
         _bio = data['bio'] ?? 'No bio available';
         _status = data['status'] ?? 'Unknown';
-        _createdTopicsCount = data['createdTopicsCount'] ?? 0;
-        _lastLogin = data['lastLogin'] != null
-            ? DateTime.parse(data['lastLogin']).toLocal().toString()
-            : 'N/A';
       });
+      _bioController.text = _bio;
+      _statusController.text = _status;
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.body}')),
-      );
+      _showSnackBar('Error: ${response.body}');
+      print('Error: ${response.body}');
     }
+  } catch (e) {
+    _showSnackBar('Request failed: $e');
+    print('Request failed: $e');
   }
+}
 
+
+  // Change profile image function
   Future<void> _changeProfileImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        _profileImageUrl = pickedFile.path;
-      });
-
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('profileImage', pickedFile.path);
+      final token = prefs.getString('token');
+      final userId = prefs.getInt('userId');
 
-      await _updateProfileData('profileImage', pickedFile.path);
+      if (token == null || token.isEmpty || userId == null) {
+        _showSnackBar('User not logged in.');
+        return;
+      }
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('https://localhost:7164/api/forum/userdetails/update'),
+      )
+        ..headers['Authorization'] = 'Bearer $token'
+        ..fields['userId'] = userId.toString()
+        ..files.add(await http.MultipartFile.fromPath('profileImage', pickedFile.path));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final data = json.decode(responseBody);
+
+        setState(() {
+          _profileImageUrl = data['profileImageUrl'] ?? _profileImageUrl;
+        });
+
+        _showSnackBar('Profile image updated successfully!');
+      } else {
+        _showSnackBar('Error: ${response.reasonPhrase}');
+      }
     }
   }
 
-  Future<void> _updateProfileData(String field, String newValue) async {
+  // Function to update profile data
+  Future<void> _updateProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final userId = prefs.getInt('userId');  // Felhasználói ID
+    final userId = prefs.getInt('userId');
 
-    if (token == null || token.isEmpty || userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not logged in.')),
-      );
+    if (token == null || userId == null) {
+      _showSnackBar('User not logged in.');
       return;
     }
 
@@ -117,135 +130,145 @@ class _AccountPageState extends State<AccountPage> {
       },
       body: json.encode({
         'userId': userId,
-        field: newValue,
+        'username': _username,
+        'email': _email,
+        'bio': _bioController.text,
+        'status': _statusController.text,
       }),
     );
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
-      );
+      _showSnackBar('Profile updated successfully!');
+      setState(() {
+        _bio = _bioController.text;
+        _statusController.text = _statusController.text;
+      });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.body}')),
-      );
+      _showSnackBar('Error: ${response.body}');
+      print('Error: ${response.body}');
     }
   }
 
+  // Logout function
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    Navigator.pushReplacement(
+    await prefs.clear();  // Clear all saved data
+
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
+      (Route<dynamic> route) => false,
     );
+  }
+
+  // Helper function for showing snackbars
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account'),
-        backgroundColor: Colors.black87,
-        elevation: 0,
+        title: const Text('Account Settings'),
+        backgroundColor: Colors.blueGrey.shade900,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.black54, Colors.grey[850]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: _changeProfileImage,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(_profileImageUrl),
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _changeProfileImage,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundImage: NetworkImage(_profileImageUrl),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Icon(Icons.camera_alt, color: Colors.white, size: 22),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  _username,
-                  style: const TextStyle(fontSize: 28, color: Colors.white),
-                ),
-                Text(
-                  _email,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Bio: $_bio',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Status: $_status',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Created Topics: $_createdTopicsCount',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Last Login: $_lastLogin',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _oldPasswordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Old Password',
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.lightBlueAccent),
-                    ),
-                    filled: true,
-                    fillColor: Colors.black38,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _newPasswordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'New Password',
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.lightBlueAccent),
-                    ),
-                    filled: true,
-                    fillColor: Colors.black38,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _logout,
-                  child: const Text('Logout'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
+            Text(
+              _username,
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _email,  // Displaying the email
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Bio: $_bio',  // Displaying current bio
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Topics Created: x',  // Displaying the number of topics created
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            const SizedBox(height: 20),
+            _buildTextField(
+              controller: _bioController,
+              label: 'Bio',
+              icon: Icons.info_outline,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _statusController,
+              label: 'Status',
+              icon: Icons.tag,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: _updateProfileData,
+              icon: const Icon(Icons.save),
+              label: const Text('Save Changes'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.blueGrey),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.lightBlueAccent),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Colors.black45,
       ),
     );
   }

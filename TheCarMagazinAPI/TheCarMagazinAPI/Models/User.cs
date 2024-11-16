@@ -33,12 +33,10 @@ namespace TheCarMagazinAPI.Models
     public class UserDetailsDto
     {
         public int UserId { get; set; }
-        public string ProfileImageUrl { get; set; }
-        public int CreatedTopicsCount { get; set; }
-        public DateTime? LastLogin { get; set; }
         public string Bio { get; set; }
         public string Status { get; set; }
     }
+
 
 
 }

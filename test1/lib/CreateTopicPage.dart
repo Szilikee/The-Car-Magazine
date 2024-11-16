@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'CreateTopicPage.dart';  // Importáld a CreateTopicPage-t!
-
-// Az összes többi kód itt következik...
-import 'package:flutter/material.dart';
 
 class CreateTopicPage extends StatefulWidget {
   @override

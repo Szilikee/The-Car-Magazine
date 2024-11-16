@@ -11,6 +11,16 @@
   },
   {
     "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "GetCarListings",
+    "RelativePath": "api/Forum/carlistings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
     "Method": "Login",
     "RelativePath": "api/Forum/login",
     "HttpMethod": "POST",
@@ -92,8 +102,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "user",
-        "Type": "TheCarMagazinAPI.Models.User",
+        "Name": "userDetailsDto",
+        "Type": "TheCarMagazinAPI.Models.UserDetailsDto",
         "IsRequired": true
       }
     ],
