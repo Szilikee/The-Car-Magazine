@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
+    "Method": "AddCar",
+    "RelativePath": "api/Forum/addcar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TheCarMagazinAPI.Models.CarListing",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
     "Method": "GetCarBrands",
     "RelativePath": "api/Forum/brands",
     "HttpMethod": "GET",

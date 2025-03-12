@@ -983,6 +983,35 @@
           }
         }
       },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "PexelsDotNetSDK/1.0.11": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/PexelsDotNetSDK.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/PexelsDotNetSDK.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Swashbuckle.AspNetCore/6.4.0": {
         "type": "package",
         "dependencies": {
@@ -3656,6 +3685,49 @@
         "mysql.entityframeworkcore.nuspec"
       ]
     },
+    "Newtonsoft.Json/13.0.3": {
+      "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "type": "package",
+      "path": "newtonsoft.json/13.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/net6.0/Newtonsoft.Json.dll",
+        "lib/net6.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.xml",
+        "newtonsoft.json.13.0.3.nupkg.sha512",
+        "newtonsoft.json.nuspec",
+        "packageIcon.png"
+      ]
+    },
+    "PexelsDotNetSDK/1.0.11": {
+      "sha512": "3i1b+QhGNqP0VDLaGVd6EJfWvNHkdQ1WxP/Uqiz+jjaul/HjM+YxfqXJEnNNFuNg3imRSeoUR8n++e26cS8AZQ==",
+      "type": "package",
+      "path": "pexelsdotnetsdk/1.0.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/PexelsDotNetSDK.dll",
+        "lib/netstandard2.0/PexelsDotNetSDK.xml",
+        "pexelsdotnetsdk.1.0.11.nupkg.sha512",
+        "pexelsdotnetsdk.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore/6.4.0": {
       "sha512": "eUBr4TW0up6oKDA5Xwkul289uqSMgY0xGN4pnbOIBqCcN9VKGGaPvHX3vWaG/hvocfGDP+MGzMA0bBBKz2fkmQ==",
       "type": "package",
@@ -4992,36 +5064,32 @@
       "Microsoft.EntityFrameworkCore.Design >= 9.0.0",
       "MySql.Data >= 9.1.0",
       "MySql.EntityFrameworkCore >= 8.0.8",
+      "Newtonsoft.Json >= 13.0.3",
+      "PexelsDotNetSDK >= 1.0.11",
       "Swashbuckle.AspNetCore >= 6.4.0",
       "System.IdentityModel.Tokens.Jwt >= 8.2.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\shiel\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\shiel\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
+      "projectUniqueName": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
       "projectName": "TheCarMagazinAPI",
-      "projectPath": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
+      "projectPath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
       "packagesPath": "C:\\Users\\shiel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\obj\\",
+      "outputPath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\shiel\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\shiel\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -5039,7 +5107,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -5071,6 +5140,14 @@
             "target": "Package",
             "version": "[8.0.8, )"
           },
+          "Newtonsoft.Json": {
+            "target": "Package",
+            "version": "[13.0.3, )"
+          },
+          "PexelsDotNetSDK": {
+            "target": "Package",
+            "version": "[1.0.11, )"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.4.0, )"
@@ -5099,7 +5176,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

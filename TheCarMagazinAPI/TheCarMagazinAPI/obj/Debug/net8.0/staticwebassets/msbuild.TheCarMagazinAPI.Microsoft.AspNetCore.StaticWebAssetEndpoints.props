@@ -1,0 +1,40 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-tgIejuUW6klmXcs3fxWBIT0WRPcQN2Tn96Dl43bPNJ8="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"153025"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022tgIejuUW6klmXcs3fxWBIT0WRPcQN2Tn96Dl43bPNJ8=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:42:23 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/0a8eb76e-b32e-4537-97de-f65169d4b61a.qblb2cxzrh.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"qblb2cxzrh"},{"Name":"integrity","Value":"sha256-tgIejuUW6klmXcs3fxWBIT0WRPcQN2Tn96Dl43bPNJ8="},{"Name":"label","Value":"_content/TheCarMagazinAPI/uploads/0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"153025"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022tgIejuUW6klmXcs3fxWBIT0WRPcQN2Tn96Dl43bPNJ8=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:42:23 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/495ad2bb-43ed-436f-b8ff-9369bd34b38a.029oqb00cn.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"029oqb00cn"},{"Name":"integrity","Value":"sha256-2KkosgQ9t340C1I1R78Wy0qkg/BkX\u002BCikO0fIKq3Ylc="},{"Name":"label","Value":"_content/TheCarMagazinAPI/uploads/495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"9"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00222KkosgQ9t340C1I1R78Wy0qkg/BkX\u002BCikO0fIKq3Ylc=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:39:38 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-2KkosgQ9t340C1I1R78Wy0qkg/BkX\u002BCikO0fIKq3Ylc="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"9"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00222KkosgQ9t340C1I1R78Wy0qkg/BkX\u002BCikO0fIKq3Ylc=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:39:38 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-Puwlalh8zPcvcdI0K236sLvKAWl8fnAUVAvdYrchINo="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"22"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Puwlalh8zPcvcdI0K236sLvKAWl8fnAUVAvdYrchINo=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:30:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/TheCarMagazinAPI/uploads/83cbd67a-6f79-40ba-8617-62d2dafcc467.q5z57tfbj2.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"q5z57tfbj2"},{"Name":"integrity","Value":"sha256-Puwlalh8zPcvcdI0K236sLvKAWl8fnAUVAvdYrchINo="},{"Name":"label","Value":"_content/TheCarMagazinAPI/uploads/83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"22"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Puwlalh8zPcvcdI0K236sLvKAWl8fnAUVAvdYrchINo=\u0022"},{"Name":"Last-Modified","Value":"Wed, 12 Mar 2025 11:30:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

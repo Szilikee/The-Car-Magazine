@@ -16,6 +16,10 @@ dependencies:
   intl: ^0.20.0
   image_picker: ^1.1.2 # Legújabb stabil verzió
   html: ^0.15.0
+  flutter_dotenv: ^5.2.1
+  table_calendar: ^3.0.0
+  url_launcher: ^6.1.6
+  xml: ^5.0.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0 # Ellenőrizd a legfrissebb verziót
@@ -54,6 +58,7 @@ flutter:
     - assets/pictures/bmw_i8.jpg
     - assets/pictures/tesla_roadster.jpg
     - assets/pictures/lamborghini_aventador.jpg
+    - assets/pictures/default_car.jpg
     
 
 

@@ -1,0 +1,37 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\wwwroot\\uploads\\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg",
+      "PackagePath": "staticwebassets\\uploads\\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg"
+    },
+    {
+      "Id": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\wwwroot\\uploads\\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg",
+      "PackagePath": "staticwebassets\\uploads\\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg"
+    },
+    {
+      "Id": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\wwwroot\\uploads\\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg",
+      "PackagePath": "staticwebassets\\uploads\\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.TheCarMagazinAPI.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.TheCarMagazinAPI.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.TheCarMagazinAPI.props",
+      "PackagePath": "build\\TheCarMagazinAPI.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.TheCarMagazinAPI.props",
+      "PackagePath": "buildMultiTargeting\\TheCarMagazinAPI.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.TheCarMagazinAPI.props",
+      "PackagePath": "buildTransitive\\TheCarMagazinAPI.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

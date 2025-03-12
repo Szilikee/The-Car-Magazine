@@ -1,0 +1,58 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>TheCarMagazinAPI</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/TheCarMagazinAPI</BasePath>
+      <RelativePath>uploads/0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>qblb2cxzrh</Fingerprint>
+      <Integrity>tgIejuUW6klmXcs3fxWBIT0WRPcQN2Tn96Dl43bPNJ8=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\0a8eb76e-b32e-4537-97de-f65169d4b61a.jpg'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>TheCarMagazinAPI</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/TheCarMagazinAPI</BasePath>
+      <RelativePath>uploads/495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>029oqb00cn</Fingerprint>
+      <Integrity>2KkosgQ9t340C1I1R78Wy0qkg/BkX+CikO0fIKq3Ylc=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\495ad2bb-43ed-436f-b8ff-9369bd34b38a.jpg'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>TheCarMagazinAPI</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/TheCarMagazinAPI</BasePath>
+      <RelativePath>uploads/83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>q5z57tfbj2</Fingerprint>
+      <Integrity>Puwlalh8zPcvcdI0K236sLvKAWl8fnAUVAvdYrchINo=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\83cbd67a-6f79-40ba-8617-62d2dafcc467.jpg'))</OriginalItemSpec>
+    </StaticWebAsset>
+  </ItemGroup>
+</Project>

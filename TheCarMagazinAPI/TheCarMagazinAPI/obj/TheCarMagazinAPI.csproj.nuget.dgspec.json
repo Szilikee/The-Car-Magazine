@@ -1,31 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj": {}
+    "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj": {
+    "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
+        "projectUniqueName": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
         "projectName": "TheCarMagazinAPI",
-        "projectPath": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
+        "projectPath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
         "packagesPath": "C:\\Users\\shiel\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\shiel\\OneDrive\\Dokumentumok\\GitHub\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\obj\\",
+        "outputPath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\shiel\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\shiel\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,7 +38,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -75,6 +71,14 @@
               "target": "Package",
               "version": "[8.0.8, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "PexelsDotNetSDK": {
+              "target": "Package",
+              "version": "[1.0.11, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.4.0, )"
@@ -103,7 +107,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

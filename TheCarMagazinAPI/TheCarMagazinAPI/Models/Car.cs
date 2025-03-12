@@ -3,12 +3,16 @@
     public class CarListing
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string ImagePath { get; set; }
-        public string Location { get; set; }
-        public string Mileage { get; set; }
-        public string Price { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public string Name { get; set; }
+        public int Year { get; set; }
+        public int selling_price { get; set; } // Nullable
+        public int km_driven { get; set; }    // Nullable
+        public string Fuel { get; set; }
+        public string seller_type { get; set; }
+        public string Transmission { get; set; }
+        public string Owner { get; set; }
     }
+
+
 
 }

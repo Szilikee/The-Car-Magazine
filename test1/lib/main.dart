@@ -4,10 +4,17 @@ import 'AccountPage.dart';
 import 'ProfilePage.dart';
 import 'ForumPage.dart';
 import 'Marketplace.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'MagazinePage.dart';
+import 'CalendarPage.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load();
   runApp(CarForumApp());
+}
+
+String getApiKey() {
+  return dotenv.env['PEXELS_API_KEY'] ?? 'ERROR: PEXELS API KEY IS NOT AVAILABLE!';
 }
 
 class CarForumApp extends StatelessWidget {
@@ -235,14 +242,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 }
 
-class CalendarPage extends StatelessWidget {
-  const CalendarPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Calendar Page'));
-  }
-}
 
 class ComparisonPage extends StatelessWidget {
   const ComparisonPage({super.key});

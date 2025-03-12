@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_car_forum/main.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
 import 'AccountPage.dart';
+import 'main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,12 +13,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isRegistering = false; // Toggle for register/login
-  bool _isLoggedIn = false; // To check if the user is logged in
-  String _username = ""; // Store the logged-in username
+  bool _isRegistering = false;
+  bool _isLoggedIn = false;
+  String _username = "";
 
   @override
   void initState() {
@@ -26,34 +25,33 @@ class _ProfilePageState extends State<ProfilePage> {
     _checkLoginStatus();
   }
 
-
-  // Check if the user is logged in
   Future<void> _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token != null && token.isNotEmpty) {
+    bool loggedIn = await AuthService().isUserLoggedIn();
+    if (loggedIn) {
       setState(() {
         _isLoggedIn = true;
       });
       _fetchUserData();
-      // Navigate to AccountPage if logged in
-      Navigator.pushAndRemoveUntil(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AccountPage()),
-        (Route<dynamic> route) => false, // Eltávolítja az összes előző oldalt
       );
     }
   }
 
-  
+  void _registerUser() {
+    // Itt lehetne ellenőrizni az emailt, jelszót és regisztrálni a felhasználót
+    setState(() {
+      _isLoggedIn = true;
+      _username = _emailController.text.split('@')[0]; // Példa: email első része lesz a felhasználónév
+    });
+  }
 
-  // Fetch User Data from the API
   Future<void> _fetchUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final userId = prefs.getInt('userID');  // Feltételezve, hogy elmentettük
+    final token = await AuthService().getToken();
+    final userId = await AuthService().getUserId();
 
-    if (token != null && token.isNotEmpty && userId != null) {
+    if (token != null && userId != null) {
       final response = await http.get(
         Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
         headers: {'Authorization': 'Bearer $token'},
@@ -61,196 +59,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-
-        // Save the user data to SharedPreferences
-        await prefs.setString('username', responseData['username']);
-        await prefs.setString('email', responseData['email']);
-        await prefs.setString('profileImage', responseData['profile_image_url'] ?? 'https://via.placeholder.com/150');
-
         setState(() {
           _username = responseData['username'];
           _emailController.text = responseData['email'];
         });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.reasonPhrase}')),
-        );
       }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLoggedIn ? 'Profile' : (_isRegistering ? 'Register' : 'Login')),
-        backgroundColor: Colors.black87,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.black54, Colors.grey[850]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              if (!_isLoggedIn) ...[
-                if (_isRegistering) _buildTextField(_usernameController, 'Username'),
-                const SizedBox(height: 16),
-                _buildTextField(_emailController, 'Email'),
-                const SizedBox(height: 16),
-                _buildTextField(_passwordController, 'Password', isPassword: true),
-                const SizedBox(height: 20),
-                _buildAuthButton(),
-                const SizedBox(height: 20),
-                _buildToggleAuthButton(),
-              ] else ...[
-                // Display logged-in user info
-                Text('Welcome, $_username', style: TextStyle(color: Colors.white, fontSize: 20)),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _logoutUser,
-                  child: Text('Logout'),
-                ),
-              ]
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // TextField creation
-  Widget _buildTextField(TextEditingController controller, String label, {bool isPassword = false}) {
-    return TextFormField(
-      controller: controller,
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.blueGrey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.lightBlueAccent),
-        ),
-        filled: true,
-        fillColor: Colors.black38,
-      ),
-    );
-  }
-
-  // Authentication Button for Register or Login
-  Widget _buildAuthButton() {
-    return ElevatedButton(
-      onPressed: _isRegistering ? _registerUser : _loginUser,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-      ),
-      child: Text(
-        _isRegistering ? 'Register' : 'Login',
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
-
-  // Registration function
-  Future<void> _registerUser() async {
-  final username = _usernameController.text.trim();
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
-
-  // Email validálása
-  final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-  if (!emailRegex.hasMatch(email)) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please enter a valid email address (e.g. example@domain.com).')),
-    );
-    return;
-  }
-
-  // Ellenőrzés, hogy a domain rész .com végződésű-e
-  if (!email.endsWith('.com')) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Email must end with .com')),
-    );
-    return;
-  }
-
-  if (username.isEmpty || email.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in all fields.')),
-    );
-    return;
-  }
-
-  try {
-    final response = await http.post(
-      Uri.parse('https://localhost:7164/api/Forum/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'username': username,
-        'email': email,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      final responseData = json.decode(response.body);
-
-      if (responseData.containsKey('token') && responseData.containsKey('userId')) {
-        final token = responseData['token'];
-        final userId = responseData['userId'];
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        await prefs.setInt('userId', userId);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful!')),
-        );
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (Route<dynamic> route) => false,
-        );
-      } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful!')),
-        );
-          Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (Route<dynamic> route) => false,
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${response.body}')),
-      );
-    }
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Network error: $error')),
-    );
-  }
-}
-
-
-  // Login function
   Future<void> _loginUser() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
-      );
+      _showMessage('Please fill in all fields.');
       return;
     }
 
@@ -263,72 +85,85 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-
         if (responseData.containsKey('token') && responseData.containsKey('userID')) {
-          final token = responseData['token'];
-          final userId = responseData['userID'];
-
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
-          await prefs.setInt('userId', userId);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login successful!')),
-          );
-
-          Navigator.pushAndRemoveUntil(
+          await AuthService().saveUserCredentials(responseData['token'], responseData['userID']);
+          _showMessage('Login successful!');
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
-            (Route<dynamic> route) => false,
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid server response. Missing Token or UserID.')),
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${response.statusCode}')),
-        );
+        _showMessage('Login failed: ${response.statusCode}');
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Network error: $error')),
-      );
+      _showMessage('Network error: $error');
     }
   }
 
-  // Logout function
   Future<void> _logoutUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('userId');
+    await AuthService().logout();
     setState(() {
       _isLoggedIn = false;
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Logged out successfully')),
-    );
-
-    Navigator.pushAndRemoveUntil(
+    _showMessage('Logged out successfully');
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const ProfilePage()),
-      (Route<dynamic> route) => false,
     );
   }
 
-  // Switch between login and register
-  Widget _buildToggleAuthButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          _isRegistering = !_isRegistering;
-        });
-      },
-      child: Text(
-        _isRegistering ? 'Already have an account? Login' : 'Need an account? Register',
-        style: const TextStyle(color: Colors.white),
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text(_isLoggedIn ? 'Profile' : (_isRegistering ? 'Register' : 'Login'))),
+    body: Center(
+      child: _isLoggedIn
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Welcome, $_username'),
+                ElevatedButton(onPressed: _logoutUser, child: const Text('Logout')),
+              ],
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildTextField(_emailController, 'Email'),
+                _buildTextField(_passwordController, 'Password', isPassword: true),
+                ElevatedButton(
+                  onPressed: _isRegistering ? _registerUser : _loginUser,
+                  child: Text(_isRegistering ? 'Register' : 'Login'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isRegistering = !_isRegistering;
+                    });
+                  },
+                  child: Text(_isRegistering ? 'Already have an account? Login' : 'Don’t have an account? Register'),
+                ),
+              ],
+            ),
+    ),
+  );
+}
+
+
+  Widget _buildTextField(TextEditingController controller, String label, {bool isPassword = false}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
       ),
     );
   }
