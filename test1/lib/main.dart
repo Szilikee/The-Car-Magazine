@@ -7,6 +7,8 @@ import 'Marketplace.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'MagazinePage.dart';
 import 'CalendarPage.dart';
+import 'ComparisonPage.dart';
+
 
 Future<void> main() async {
   await dotenv.load();
@@ -122,7 +124,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Tab(text: 'Magazine'),
                   Tab(text: 'Forum'),
                   Tab(text: 'Marketplace'),
-                  Tab(text: 'Calendar'),
+                  Tab(text: 'F1 Overview'),
                   Tab(text: 'Comparison'),
                   Tab(text: 'Account'),  // Csak akkor elérhető, ha be van jelentkezve
                 ]
@@ -131,7 +133,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Tab(text: 'Magazine'),
                   Tab(text: 'Forum'),
                   Tab(text: 'Marketplace'),
-                  Tab(text: 'Calendar'),
+                  Tab(text: 'F1 Overview'),
                   Tab(text: 'Comparison'),
                   Tab(text: 'Profile'),  // Ha nincs bejelentkezve, akkor csak a ProfilePage érhető el
                 ],
@@ -214,7 +216,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             },
           ),
           ListTile(
-            title: const Text('Calendar'),
+            title: const Text('Race Schedule'),
             onTap: () {
               _tabController.index = 4; // Navigate to Calendar tab
               Navigator.pop(context);
@@ -239,15 +241,5 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
       ),
     );
-  }
-}
-
-
-class ComparisonPage extends StatelessWidget {
-  const ComparisonPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Comparison Page'));
   }
 }

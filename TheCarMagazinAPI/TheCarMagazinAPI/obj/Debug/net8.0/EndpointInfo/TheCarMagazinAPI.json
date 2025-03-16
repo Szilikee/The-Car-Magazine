@@ -5,6 +5,51 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/cars/brands": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/cars/models": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/cars/details": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Forum/register": {
       "post": {
         "tags": [
@@ -197,10 +242,10 @@
         }
       }
     },
-    "/api/Forum/carlistings": {
+    "/api/Marketplace/carlistings": {
       "get": {
         "tags": [
-          "Forum"
+          "Marketplace"
         ],
         "responses": {
           "200": {
@@ -209,10 +254,10 @@
         }
       }
     },
-    "/api/Forum/addcar": {
+    "/api/Marketplace/addcar": {
       "post": {
         "tags": [
-          "Forum"
+          "Marketplace"
         ],
         "requestBody": {
           "content": {
@@ -259,8 +304,8 @@
             "format": "int32"
           },
           "selling_price": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "double"
           },
           "km_driven": {
             "type": "integer",

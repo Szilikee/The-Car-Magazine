@@ -44,11 +44,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Build the application
 var app = builder.Build();
 
-app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+// Enable CORS
+app.UseCors("AllowAll");
+
+// Enable HTTPS redirection
+app.UseHttpsRedirection();
+
+// Enable Authentication and Authorization
+app.UseAuthentication(); // Ensure Authentication middleware is added before Authorization
+app.UseAuthorization();
 
 // Enable Swagger in development
 if (app.Environment.IsDevelopment())
@@ -57,17 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Enable CORS
-app.UseCors("AllowAll");
-
-// Enable HTTPS redirection
-app.UseHttpsRedirection();
-
-// Enable Authorization
-app.UseAuthentication();  // Ensure Authentication middleware is added before Authorization
-app.UseAuthorization();
-
-// Map controllers
+// Routing for Controllers
 app.MapControllers();
 
+// Run the application
 app.Run();

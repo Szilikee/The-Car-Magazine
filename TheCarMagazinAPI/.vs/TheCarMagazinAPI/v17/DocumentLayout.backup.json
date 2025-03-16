@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|c:\\users\\shiel\\onedrive\\desktop\\szili\\szakvizsga2025\\thecarmagazinapi\\thecarmagazinapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|solutionrelative:thecarmagazinapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|c:\\users\\shiel\\onedrive\\desktop\\szili\\szakvizsga2025\\thecarmagazinapi\\thecarmagazinapi\\controllers\\carcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|solutionrelative:thecarmagazinapi\\controllers\\carcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|c:\\users\\shiel\\onedrive\\desktop\\szili\\szakvizsga2025\\thecarmagazinapi\\thecarmagazinapi\\controllers\\forumcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|solutionrelative:thecarmagazinapi\\controllers\\forumcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|c:\\users\\shiel\\onedrive\\desktop\\szili\\szakvizsga2025\\thecarmagazinapi\\thecarmagazinapi\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F6D43B3D-34D4-477E-B61E-9462C0F76A2E}|TheCarMagazinAPI\\TheCarMagazinAPI.csproj|solutionrelative:thecarmagazinapi\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 229,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,28 +26,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Program.cs",
-              "RelativeDocumentMoniker": "TheCarMagazinAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Program.cs",
-              "RelativeToolTip": "TheCarMagazinAPI\\Program.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAAAC4AAAARAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "TheCarMagazinAPI\\Services\\UserService.cs",
+              "ToolTip": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Services\\UserService.cs",
+              "RelativeToolTip": "TheCarMagazinAPI\\Services\\UserService.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAwwEcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T21:47:05.088Z",
+              "WhenOpened": "2025-03-16T18:31:57.196Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ForumController.cs",
-              "DocumentMoniker": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Controllers\\ForumController.cs",
-              "RelativeDocumentMoniker": "TheCarMagazinAPI\\Controllers\\ForumController.cs",
-              "ToolTip": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Controllers\\ForumController.cs",
-              "RelativeToolTip": "TheCarMagazinAPI\\Controllers\\ForumController.cs",
-              "ViewState": "AgIAAEwBAAAAAAAAAAAAAGkBAAAgAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "CarController.cs",
+              "DocumentMoniker": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Controllers\\CarController.cs",
+              "RelativeDocumentMoniker": "TheCarMagazinAPI\\Controllers\\CarController.cs",
+              "ToolTip": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\Controllers\\CarController.cs",
+              "RelativeToolTip": "TheCarMagazinAPI\\Controllers\\CarController.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAqwC0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T21:38:10.049Z",
+              "WhenOpened": "2025-03-16T18:27:27.82Z",
               "EditorCaption": ""
             }
           ]
