@@ -331,3 +331,4 @@ C:\Users\shiel\OneDrive\Desktop\Szili\SzakVizsga2025\TheCarMagazinAPI\TheCarMaga
 C:\Users\shiel\OneDrive\Desktop\Szili\SzakVizsga2025\TheCarMagazinAPI\TheCarMagazinAPI\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\shiel\OneDrive\Desktop\Szili\SzakVizsga2025\TheCarMagazinAPI\TheCarMagazinAPI\bin\Debug\net8.0\PexelsDotNetSDK.dll
 C:\Users\shiel\OneDrive\Desktop\Szili\SzakVizsga2025\TheCarMagazinAPI\TheCarMagazinAPI\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\shiel\OneDrive\Desktop\Szili\SzakVizsga2025\TheCarMagazinAPI\TheCarMagazinAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll

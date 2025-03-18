@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "vn1wMl0JVUM=",
+  "dgSpecHash": "b1GLE4wJCoA=",
   "success": true,
   "projectFilePath": "C:\\Users\\shiel\\OneDrive\\Desktop\\Szili\\SzakVizsga2025\\TheCarMagazinAPI\\TheCarMagazinAPI\\TheCarMagazinAPI.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\shiel\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\shiel\\.nuget\\packages\\bouncycastle.cryptography\\2.3.1\\bouncycastle.cryptography.2.3.1.nupkg.sha512",
     "C:\\Users\\shiel\\.nuget\\packages\\dapper\\2.1.35\\dapper.2.1.35.nupkg.sha512",
     "C:\\Users\\shiel\\.nuget\\packages\\google.protobuf\\3.26.1\\google.protobuf.3.26.1.nupkg.sha512",

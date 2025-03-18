@@ -18,7 +18,38 @@
     "Order": 0,
     "Parameters": [
       {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
         "Name": "model",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "trim",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "year",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.CarController",
+    "Method": "GetCarImages",
+    "RelativePath": "api/cars/images",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "genmodel_ID",
         "Type": "System.String",
         "IsRequired": false
       }
@@ -32,17 +63,60 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "GetCarBrands",
-    "RelativePath": "api/Forum/brands",
+    "ContainingType": "TheCarMagazinAPI.Controllers.CarController",
+    "Method": "GetCarTrims",
+    "RelativePath": "api/cars/trims",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "model",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.CarController",
+    "Method": "GetCarYears",
+    "RelativePath": "api/cars/years",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "brand",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "model",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "trim",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -56,22 +130,6 @@
       {
         "Name": "userDto",
         "Type": "TheCarMagazinAPI.Models.UserLoginDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "GetCarModels",
-    "RelativePath": "api/Forum/models/{brand}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "brand",
-        "Type": "System.String",
         "IsRequired": true
       }
     ],
@@ -130,27 +188,6 @@
       {
         "Name": "userDetailsDto",
         "Type": "TheCarMagazinAPI.Models.UserDetailsDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "GetCarYears",
-    "RelativePath": "api/Forum/years/{brand}/{model}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "brand",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "model",
-        "Type": "System.String",
         "IsRequired": true
       }
     ],

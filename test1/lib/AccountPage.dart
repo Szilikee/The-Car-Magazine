@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'main.dart';
+
+// Simple Topic model
+class Topic {
+  final int id;
+  final String title;
+  final DateTime createdAt;
+
+  Topic({required this.id, required this.title, required this.createdAt});
+
+  factory Topic.fromJson(Map<String, dynamic> json) {
+    return Topic(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
 
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -15,10 +32,11 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   String _username = '';
   String _email = '';
-  String _profileImageUrl = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+  String _profileImageUrl =
+      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
   String _bio = '';
   String _status = 'Aktív';
-  final _picker = ImagePicker();
+  List<Topic> _createdTopics = [];
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _statusController = TextEditingController();
 
@@ -26,96 +44,103 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     super.initState();
     _loadUserData();
-  }
-Future<void> _loadUserData() async {
-  final prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('token');
-  int? userId = prefs.getInt('userId');
-
-  if (token == null || token.isEmpty || userId == null) {
-    _showSnackBar('User not logged in.');
-    return;
+    _loadCreatedTopics();
   }
 
-  try {
-    // Get user details from the API or load from the local storage
-    final response = await http.get(
-      Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    String? userId = prefs.getString('userID');
 
-    print('Response Status Code: ${response.statusCode}');
-    print('Response Body: ${response.body}');
+    print('Token: $token');
+    print('UserID: $userId');
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        _username = data['username'] ?? 'Guest';
-        _email = data['email'] ?? 'No email';
-        _profileImageUrl = data['profileImageUrl'] ?? _profileImageUrl;
-        _bio = data['bio'] ?? 'No bio available';
-        _status = data['status'] ?? 'Unknown';
-      });
-      _bioController.text = _bio;
-      _statusController.text = _status;
-    } else {
-      _showSnackBar('Error: ${response.body}');
-      print('Error: ${response.body}');
+    if (token == null || token.isEmpty || userId == null) {
+      _showSnackBar('User not logged in.');
+      return;
     }
-  } catch (e) {
-    _showSnackBar('Request failed: $e');
-    print('Request failed: $e');
-  }
-}
 
+    try {
+      final response = await http.get(
+        Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-  // Change profile image function
-  Future<void> _changeProfileImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      final userId = prefs.getInt('userId');
-
-      if (token == null || token.isEmpty || userId == null) {
-        _showSnackBar('User not logged in.');
-        return;
-      }
-
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('https://localhost:7164/api/forum/userdetails/update'),
-      )
-        ..headers['Authorization'] = 'Bearer $token'
-        ..fields['userId'] = userId.toString()
-        ..files.add(await http.MultipartFile.fromPath('profileImage', pickedFile.path));
-
-      final response = await request.send();
+      print('User Details Response Status Code: ${response.statusCode}');
+      print('User Details Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final responseBody = await response.stream.bytesToString();
-        final data = json.decode(responseBody);
-
+        final data = json.decode(response.body);
         setState(() {
+          _username = data['username'] ?? 'Guest';
+          _email = data['email'] ?? 'No email';
           _profileImageUrl = data['profileImageUrl'] ?? _profileImageUrl;
+          _bio = data['bio'] ?? 'No bio available';
+          _status = data['status'] ?? 'Unknown';
+          _bioController.text = _bio;
+          _statusController.text = _status;
         });
-
-        _showSnackBar('Profile image updated successfully!');
       } else {
-        _showSnackBar('Error: ${response.reasonPhrase}');
+        _showSnackBar('Error loading user data: ${response.body}');
+        print('Error: ${response.body}');
       }
+    } catch (e) {
+      _showSnackBar('Request failed: $e');
+      print('Request failed: $e');
     }
   }
 
-  // Function to update profile data
+  Future<void> _loadCreatedTopics() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    String? userId = prefs.getString('userID');
+
+    if (token == null || userId == null) {
+      _showSnackBar('User not logged in.');
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://localhost:7164/api/forum/topics/created/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Topics Response Status Code: ${response.statusCode}');
+      print('Topics Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _createdTopics = data.map((json) => Topic.fromJson(json)).toList();
+        });
+      } else {
+        _showSnackBar('Error loading topics: ${response.body}');
+        print('Error: ${response.body}');
+      }
+    } catch (e) {
+      _showSnackBar('Failed to load topics: $e');
+      print('Failed to load topics: $e');
+    }
+  }
+
+  Future<void> _changeProfileImage() async {
+    if (kIsWeb) {
+      _showSnackBar('Image picking is not supported on web.');
+      return;
+    }
+  }
+
   Future<void> _updateProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final userId = prefs.getInt('userId');
+    final userId = prefs.getString('userID');
 
     if (token == null || userId == null) {
       _showSnackBar('User not logged in.');
@@ -141,7 +166,7 @@ Future<void> _loadUserData() async {
       _showSnackBar('Profile updated successfully!');
       setState(() {
         _bio = _bioController.text;
-        _statusController.text = _statusController.text;
+        _status = _statusController.text;
       });
     } else {
       _showSnackBar('Error: ${response.body}');
@@ -149,10 +174,9 @@ Future<void> _loadUserData() async {
     }
   }
 
-  // Logout function
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();  // Clear all saved data
+    await prefs.clear();
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -161,7 +185,6 @@ Future<void> _loadUserData() async {
     );
   }
 
-  // Helper function for showing snackbars
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
@@ -175,73 +198,95 @@ Future<void> _loadUserData() async {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: _changeProfileImage,
-              child: CircleAvatar(
-                radius: 55,
-                backgroundImage: NetworkImage(_profileImageUrl),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Icon(Icons.camera_alt, color: Colors.white, size: 22),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _changeProfileImage,
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundImage: NetworkImage(_profileImageUrl),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Icon(Icons.camera_alt, color: Colors.white, size: 22),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _username,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _email,  // Displaying the email
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Bio: $_bio',  // Displaying current bio
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Topics Created: x',  // Displaying the number of topics created
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _bioController,
-              label: 'Bio',
-              icon: Icons.info_outline,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              controller: _statusController,
-              label: 'Status',
-              icon: Icons.tag,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: _updateProfileData,
-              icon: const Icon(Icons.save),
-              label: const Text('Save Changes'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              const SizedBox(height: 16),
+              Text(
+                _username,
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: const Text('Logout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              const SizedBox(height: 8),
+              Text(
+                _email,
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'Bio: $_bio',
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Topics Created (${_createdTopics.length}):',
+                style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _createdTopics.isEmpty
+                  ? const Text(
+                      'No topics created yet.',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    )
+                  : Column(
+                      children: _createdTopics
+                          .map((topic) => ListTile(
+                                title: Text(
+                                  topic.title,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                subtitle: Text(
+                                  'Created: ${topic.createdAt.toLocal().toString().split('.')[0]}',
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+              const SizedBox(height: 20),
+              _buildTextField(
+                controller: _bioController,
+                label: 'Bio',
+                icon: Icons.info_outline,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _statusController,
+                label: 'Status',
+                icon: Icons.tag,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: _updateProfileData,
+                icon: const Icon(Icons.save),
+                label: const Text('Save Changes'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _logout,
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

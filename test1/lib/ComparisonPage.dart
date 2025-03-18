@@ -3,321 +3,500 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ComparisonPage extends StatefulWidget {
-  const ComparisonPage({super.key});
+  final String selectedLanguage;
+
+  const ComparisonPage({super.key, required this.selectedLanguage});
 
   @override
   _ComparisonPageState createState() => _ComparisonPageState();
 }
 
 class _ComparisonPageState extends State<ComparisonPage> {
-  List<String> carModelsCar1 = [];
-  List<String> carModelsCar2 = [];
-  dynamic dataCar1;
-  dynamic dataCar2;
-  bool isLoading = false;
-  TextEditingController car1Controller = TextEditingController();
-  TextEditingController car2Controller = TextEditingController();
+  String? selectedBrandCar1, selectedBrandCar2, selectedModelCar1, selectedModelCar2, selectedTrimCar1, selectedTrimCar2;
+  int? selectedYearCar1, selectedYearCar2;
+  Map<String, dynamic>? carDetailsCar1, carDetailsCar2;
+  List<String> carBrands = [];
+  List<String> carModelsCar1 = [], carModelsCar2 = [];
+  List<String> carTrimsCar1 = [], carTrimsCar2 = [];
+  List<int> carYearsCar1 = [], carYearsCar2 = [];
+
+  // Translations (mirroring HomePage's structure)
+  final Map<String, Map<String, String>> translations = {
+    'en': {
+      'appTitle': 'The Car Magazin',
+      'comparisonPageTitle': 'Car Comparison',
+      'selectCar': 'Select car',
+      'selectBrand': 'Select Brand',
+      'selectModel': 'Select Model for ',
+      'selectTrim': 'Select Trim for ',
+      'selectYear': 'Select Year for ',
+      'comparisonResult': 'Comparison Result',
+      'pleaseSelectAll': 'Please select all options for both cars to compare.',
+      'property': 'Property',
+    },
+    'hu': {
+      'appTitle': 'Az Autó Magazin',
+      'comparisonPageTitle': 'Autó Összehasonlítás',
+      'selectCar': 'Válassz autót',
+      'selectBrand': 'Válassz márkát',
+      'selectModel': 'Válassz modellt ',
+      'selectTrim': 'Válassz felszereltséget ',
+      'selectYear': 'Válassz évet ',
+      'comparisonResult': 'Összehasonlítás Eredménye',
+      'pleaseSelectAll': 'Kérlek, válassz ki minden opciót mindkét autóhoz az összehasonlításhoz.',
+      'property': 'Tulajdonság',
+    },
+  };
 
   @override
-  void dispose() {
-    car1Controller.dispose();
-    car2Controller.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    fetchCarBrands();
   }
 
-  Future<void> fetchCarModels(String carBrand, {required bool isCar1}) async {
-    setState(() => isLoading = true);
-    String url = 'https://localhost:7164/api/cars/models?brand=$carBrand';
+  Future<void> fetchCarBrands() async {
+    var response = await http.get(Uri.parse('https://localhost:7164/api/cars/brands'));
+    if (response.statusCode == 200) {
+      setState(() {
+        carBrands = List<String>.from(json.decode(response.body));
+      });
+    } else {
+      throw Exception('Failed to load car brands');
+    }
+  }
 
+  Future<void> fetchCarModels(String brand, int carNumber) async {
+    var response = await http.get(Uri.parse('https://localhost:7164/api/cars/models?brand=$brand'));
+    if (response.statusCode == 200) {
+      setState(() {
+        if (carNumber == 1) {
+          carModelsCar1 = List<String>.from(json.decode(response.body));
+        } else {
+          carModelsCar2 = List<String>.from(json.decode(response.body));
+        }
+      });
+    } else {
+      throw Exception('Failed to load car models');
+    }
+  }
+
+  Future<void> fetchCarTrims(String brand, String model, int carNumber) async {
+    var response = await http.get(Uri.parse('https://localhost:7164/api/cars/trims?brand=$brand&model=$model'));
+    if (response.statusCode == 200) {
+      setState(() {
+        if (carNumber == 1) {
+          carTrimsCar1 = List<String>.from(json.decode(response.body));
+        } else {
+          carTrimsCar2 = List<String>.from(json.decode(response.body));
+        }
+      });
+    } else {
+      throw Exception('Failed to load car trims');
+    }
+  }
+
+  Future<void> fetchCarYears(String brand, String model, String trim, int carNumber) async {
+    var response = await http.get(Uri.parse('https://localhost:7164/api/cars/years?brand=$brand&model=$model&trim=$trim'));
+    if (response.statusCode == 200) {
+      setState(() {
+        if (carNumber == 1) {
+          carYearsCar1 = List<int>.from(json.decode(response.body));
+        } else {
+          carYearsCar2 = List<int>.from(json.decode(response.body));
+        }
+      });
+    } else {
+      throw Exception('Failed to load car years');
+    }
+  }
+
+  Future<void> fetchCarDetails(String brand, String model, String trim, int year, int carNumber) async {
+    var url = 'https://localhost:7164/api/cars/details?brand=$brand&model=$model&trim=$trim&year=$year';
     try {
-      final response = await http.get(Uri.parse(url));
+      var response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        var data = json.decode(response.body);
+        data['brand'] = brand;
         setState(() {
-          if (isCar1) {
-            carModelsCar1 = jsonResponse.cast<String>();
+          if (carNumber == 1) {
+            carDetailsCar1 = data as Map<String, dynamic>;
           } else {
-            carModelsCar2 = jsonResponse.cast<String>();
+            carDetailsCar2 = data as Map<String, dynamic>;
           }
         });
       } else {
-        throw Exception('Failed to load car models');
+        throw Exception('Failed to load car details: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Error: $e');
-    } finally {
-      setState(() => isLoading = false);
+      print('Error in fetchCarDetails: $e');
+      rethrow;
     }
   }
 
-Future<void> fetchData(String carModel, {required bool isCar1}) async {
-  setState(() => isLoading = true);
-
-  // Csak a modell részét küldjük el a kéréshez
-  List<String> parts = carModel.split(' ');
-  String modelOnly = parts.length > 1 ? parts.sublist(1).join(' ') : carModel;
-  String url = 'https://localhost:7164/api/cars/details?model=$modelOnly';
-
-  print('Küldött URL: $url'); // Logoljuk a küldött URL-t
-
-  try {
-    final response = await http.get(Uri.parse(url));
-    print('API válasz kód: ${response.statusCode}'); // API válaszkód logolása
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      print('API válasz: $jsonResponse'); // A válasz logolása
-
-      if (mounted) {
-        setState(() {
-          if (isCar1) {
-            dataCar1 = jsonResponse;
-          } else {
-            dataCar2 = jsonResponse;
-          }
-        });
-      }
-    } else {
-      throw Exception('Nem sikerült betölteni az adatokat - Status Code: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Hiba: $e'); // Hiba logolása
-  } finally {
-    if (mounted) {
-      setState(() => isLoading = false);
-    }
+  String getBrandImagePath(String brand) {
+    if (brand.isEmpty) return 'logos/default.png';
+    String cleanBrand = brand.toLowerCase().replaceAll(' ', '');
+    return 'logos/$cleanBrand.png';
   }
-}
 
+  Widget buildComparisonTable() {
+    bool isDataComplete = [
+      selectedBrandCar1,
+      selectedBrandCar2,
+      selectedModelCar1,
+      selectedModelCar2,
+      selectedTrimCar1,
+      selectedTrimCar2,
+      selectedYearCar1,
+      selectedYearCar2,
+      carDetailsCar1,
+      carDetailsCar2
+    ].every((element) => element != null);
 
+    if (!isDataComplete) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            translations[widget.selectedLanguage]!['pleaseSelectAll']!,
+            style: TextStyle(fontSize: 16, color: Colors.grey[600], fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildCarColumn(selectedModelCar1!, carDetailsCar1!, Colors.blue),
+            _buildCarColumn(selectedModelCar2!, carDetailsCar2!, Colors.green),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildComparisonCard(),
+      ],
+    );
+  }
+
+  Widget _buildCarColumn(String model, Map<String, dynamic> details, Color color) {
+    String brand = (details['brand'] ?? '').toString().toLowerCase();
+    String imagePath = getBrandImagePath(brand);
+    
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            model,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+          ),
+          const SizedBox(height: 8),
+          Image.asset(
+            imagePath,
+            height: 150,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return _buildDefaultImage();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultImage() {
+    return const Icon(Icons.image_not_supported, size: 100, color: Colors.grey);
+  }
+
+  Widget _buildComparisonCard() {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DataTable(
+          columnSpacing: 20,
+          columns: [
+            _buildDataColumn(translations[widget.selectedLanguage]!['property']!, null),
+            _buildDataColumn(selectedModelCar1!, Colors.blue),
+            _buildDataColumn(selectedModelCar2!, Colors.green),
+          ],
+          rows: [
+            _buildDataRow('Brand', selectedBrandCar1, selectedBrandCar2),
+            _buildDataRow('Model', selectedModelCar1, selectedModelCar2),
+            _buildDataRow('Trim', selectedTrimCar1, selectedTrimCar2),
+            _buildDataRow('Year', selectedYearCar1.toString(), selectedYearCar2.toString()),
+            _buildDataRow('Price', '£${carDetailsCar1!['price']?.toString() ?? 'N/A'}', '£${carDetailsCar2!['price']?.toString() ?? 'N/A'}'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  DataColumn _buildDataColumn(String label, [Color? color]) {
+    return DataColumn(
+      label: Text(
+        label,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color),
+      ),
+    );
+  }
+
+  DataRow _buildDataRow(String property, String? value1, String? value2) {
+    return DataRow(
+      cells: [
+        DataCell(Text(property, style: const TextStyle(fontWeight: FontWeight.w500))),
+        DataCell(Text(value1 ?? 'N/A', style: const TextStyle(color: Colors.blue))),
+        DataCell(Text(value2 ?? 'N/A', style: const TextStyle(color: Colors.green))),
+      ],
+    );
+  }
+
+  Widget buildDropdown<T>({
+    required T? value,
+    required String hint,
+    required List<T> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[400]!),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            value: value,
+            hint: Text(hint, style: const TextStyle(color: Colors.grey)),
+            isExpanded: true,
+            items: items.map((item) {
+              return DropdownMenuItem<T>(
+                value: item,
+                child: Text(item.toString(), style: const TextStyle(fontSize: 16)),
+              );
+            }).toList(),
+            onChanged: onChanged,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text("Car Comparison"),
-      centerTitle: true,
-      elevation: 0,
-    ),
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          translations[widget.selectedLanguage]!['comparisonPageTitle']!,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.blueAccent,
+        elevation: 2,
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildTextField(
-                  label: "Car 1",
-                  controller: car1Controller,
-                  onChanged: (newValue) {
-                    fetchCarModels(newValue, isCar1: true);
-                  },
-                  isCar1: true,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              translations[widget.selectedLanguage]!['selectCar']!,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            buildDropdown<String>(
+                              value: selectedBrandCar1,
+                              hint: translations[widget.selectedLanguage]!['selectBrand']!,
+                              items: carBrands,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedBrandCar1 = value;
+                                  selectedModelCar1 = null;
+                                  selectedTrimCar1 = null;
+                                  selectedYearCar1 = null;
+                                  carModelsCar1.clear();
+                                  carTrimsCar1.clear();
+                                  carYearsCar1.clear();
+                                  carDetailsCar1 = null;
+                                  fetchCarModels(value!, 1);
+                                });
+                              },
+                            ),
+                            if (selectedBrandCar1 != null)
+                              buildDropdown<String>(
+                                value: selectedModelCar1,
+                                hint: translations[widget.selectedLanguage]!['selectModel']! + selectedBrandCar1!,
+                                items: carModelsCar1,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedModelCar1 = value;
+                                    selectedTrimCar1 = null;
+                                    selectedYearCar1 = null;
+                                    carTrimsCar1.clear();
+                                    carYearsCar1.clear();
+                                    carDetailsCar1 = null;
+                                    fetchCarTrims(selectedBrandCar1!, value!, 1);
+                                  });
+                                },
+                              ),
+                            if (selectedModelCar1 != null)
+                              buildDropdown<String>(
+                                value: selectedTrimCar1,
+                                hint: translations[widget.selectedLanguage]!['selectTrim']! + selectedBrandCar1!,
+                                items: carTrimsCar1,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    selectedTrimCar1 = value;
+                                    selectedYearCar1 = null;
+                                    carYearsCar1.clear();
+                                    carDetailsCar1 = null;
+                                  });
+                                  await fetchCarYears(selectedBrandCar1!, selectedModelCar1!, value!, 1);
+                                  setState(() {});
+                                },
+                              ),
+                            if (selectedTrimCar1 != null && carYearsCar1.isNotEmpty)
+                              buildDropdown<int>(
+                                value: selectedYearCar1,
+                                hint: translations[widget.selectedLanguage]!['selectYear']! + selectedBrandCar1!,
+                                items: carYearsCar1,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    selectedYearCar1 = value;
+                                    carDetailsCar1 = null;
+                                  });
+                                  await fetchCarDetails(selectedBrandCar1!, selectedModelCar1!, selectedTrimCar1!, value!, 1);
+                                  setState(() {});
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              translations[widget.selectedLanguage]!['selectCar']!,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            buildDropdown<String>(
+                              value: selectedBrandCar2,
+                              hint: translations[widget.selectedLanguage]!['selectBrand']!,
+                              items: carBrands,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedBrandCar2 = value;
+                                  selectedModelCar2 = null;
+                                  selectedTrimCar2 = null;
+                                  selectedYearCar2 = null;
+                                  carModelsCar2.clear();
+                                  carTrimsCar2.clear();
+                                  carYearsCar2.clear();
+                                  carDetailsCar2 = null;
+                                  fetchCarModels(value!, 2);
+                                });
+                              },
+                            ),
+                            if (selectedBrandCar2 != null)
+                              buildDropdown<String>(
+                                value: selectedModelCar2,
+                                hint: translations[widget.selectedLanguage]!['selectModel']! + selectedBrandCar2!,
+                                items: carModelsCar2,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedModelCar2 = value;
+                                    selectedTrimCar2 = null;
+                                    selectedYearCar2 = null;
+                                    carTrimsCar2.clear();
+                                    carYearsCar2.clear();
+                                    carDetailsCar2 = null;
+                                    fetchCarTrims(selectedBrandCar2!, value!, 2);
+                                  });
+                                },
+                              ),
+                            if (selectedModelCar2 != null)
+                              buildDropdown<String>(
+                                value: selectedTrimCar2,
+                                hint: translations[widget.selectedLanguage]!['selectTrim']! + selectedBrandCar2!,
+                                items: carTrimsCar2,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    selectedTrimCar2 = value;
+                                    selectedYearCar2 = null;
+                                    carYearsCar2.clear();
+                                    carDetailsCar2 = null;
+                                  });
+                                  await fetchCarYears(selectedBrandCar2!, selectedModelCar2!, value!, 2);
+                                  setState(() {});
+                                },
+                              ),
+                            if (selectedTrimCar2 != null && carYearsCar2.isNotEmpty)
+                              buildDropdown<int>(
+                                value: selectedYearCar2,
+                                hint: translations[widget.selectedLanguage]!['selectYear']! + selectedBrandCar2!,
+                                items: carYearsCar2,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    selectedYearCar2 = value;
+                                    carDetailsCar2 = null;
+                                  });
+                                  await fetchCarDetails(selectedBrandCar2!, selectedModelCar2!, selectedTrimCar2!, value!, 2);
+                                  setState(() {});
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildTextField(
-                  label: "Car 2",
-                  controller: car2Controller,
-                  onChanged: (newValue) {
-                    fetchCarModels(newValue, isCar1: false);
-                  },
-                  isCar1: false,
+              const SizedBox(height: 24),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      translations[widget.selectedLanguage]!['comparisonResult']!,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    buildComparisonTable(),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: isLoading && (dataCar1 == null || dataCar2 == null)
-                ? const Center(child: CircularProgressIndicator())
-                : (dataCar1 == null || dataCar2 == null)
-                    ? const Center(child: Text("Select two cars to compare"))
-                    : _buildComparisonTable(),
-          ),
-        ],
+        ),
       ),
-    ),
-  );
-}
-
-Widget _buildTextField({
-  required String label,
-  required TextEditingController controller,
-  required ValueChanged<String> onChanged,
-  required bool isCar1,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 4),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          return Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              if (textEditingValue.text.isEmpty) {
-                return const Iterable<String>.empty();
-              }
-              await fetchCarModels(textEditingValue.text, isCar1: isCar1);
-              return (isCar1 ? carModelsCar1 : carModelsCar2)
-                  .where((model) => model.toLowerCase().startsWith(textEditingValue.text.toLowerCase()));
-            },
-            onSelected: (String selection) {
-              controller.text = selection;
-              fetchData(selection, isCar1: isCar1);
-            },
-            optionsMaxHeight: 200,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-              controller.addListener(() {
-                textEditingController.text = controller.text;
-              });
-              return TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                onChanged: onChanged,
-                decoration: InputDecoration(
-                  hintText: "Enter Car Model",
-                  border: const OutlineInputBorder(),
-                  suffixIcon: isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : null,
-                ),
-              );
-            },
-            optionsViewBuilder: (context, onSelected, options) {
-              return Align(
-                alignment: Alignment.topLeft,
-                child: Material(
-                  elevation: 4.0,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: constraints.maxWidth,
-                      maxHeight: 200,
-                    ),
-                    child: StatefulBuilder(
-                      builder: (context, setState) {
-                        return ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (context, index) {
-                            final String option = options.elementAt(index);
-                            bool isHovered = false; // Local hover state
-                            return MouseRegion(
-                              onEnter: (_) => setState(() => isHovered = true),
-                              onExit: (_) => setState(() => isHovered = false),
-                              child: GestureDetector(
-                                onTap: () => onSelected(option),
-                                child: Container(
-                                  color: isHovered ? Colors.grey[200] : Colors.transparent,
-                                  child: ListTile(
-                                    title: Text(option),
-                                    hoverColor: Colors.grey[300],
-                                    dense: true,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    ],
-  );
-}
-
-Widget _buildComparisonTable() {
-  if (dataCar1 == null || dataCar2 == null) {
-    return const Center(child: Text("Select two cars to compare"));
+    );
   }
-
-  // Lekérdezzük a modelleket
-  String car1Name = dataCar1?['model'] ?? 'No data';
-  String car2Name = dataCar2?['model'] ?? 'No data';
-
-  return Card(
-    elevation: 4,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "Comparing: $car1Name vs $car2Name",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueAccent,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            child: Table(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columnWidths: const {
-                0: FlexColumnWidth(2),
-                1: FlexColumnWidth(3),
-                2: FlexColumnWidth(3),
-              },
-              children: [
-                _buildTableRow("Attribute", car1Name, car2Name, isHeader: true),
-                _buildTableRow("Price (€)", dataCar1?['price']?.toString() ?? 'No data', dataCar2?['price']?.toString() ?? 'No data'),
-                _buildTableRow("Year", dataCar1?['year']?.toString() ?? 'No data', dataCar2?['year']?.toString() ?? 'No data'),
-                _buildTableRow("Fuel Type", dataCar1?['fuelType'] ?? 'No data', dataCar2?['fuelType'] ?? 'No data'),
-                _buildTableRow("Max Power", dataCar1?['maxPower'] ?? 'No data', dataCar2?['maxPower'] ?? 'No data'),
-                _buildTableRow("Max Torque", dataCar1?['maxTorque'] ?? 'No data', dataCar2?['maxTorque'] ?? 'No data'),
-                _buildTableRow("Drivetrain", dataCar1?['drivetrain'] ?? 'No data', dataCar2?['drivetrain'] ?? 'No data'),
-                _buildTableRow("Engine", dataCar1?['engine'] ?? 'No data', dataCar2?['engine'] ?? 'No data'),
-                _buildTableRow("Transmission", dataCar1?['transmission'] ?? 'No data', dataCar2?['transmission'] ?? 'No data'),
-                _buildTableRow("Length", dataCar1?['length']?.toString() ?? 'No data', dataCar2?['length']?.toString() ?? 'No data'),
-                _buildTableRow("Width", dataCar1?['width']?.toString() ?? 'No data', dataCar2?['width']?.toString() ?? 'No data'),
-                _buildTableRow("Height", dataCar1?['height']?.toString() ?? 'No data', dataCar2?['height']?.toString() ?? 'No data'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
-TableRow _buildTableRow(String attribute, String value1, String value2, {bool isHeader = false}) {
-  return TableRow(
-    decoration: isHeader ? BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)) : null,
-    children: [
-      _buildTableCell(attribute, isHeader),
-      _buildTableCell(value1, isHeader),
-      _buildTableCell(value2, isHeader),
-    ],
-  );
-}
-
-Widget _buildTableCell(String text, bool isHeader) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Text(
-      text,
-      style: TextStyle(
-        fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-        color: isHeader ? Colors.blueAccent : Colors.white,
-      ),
-      textAlign: TextAlign.center,
-    ),
-  );
-}
 }

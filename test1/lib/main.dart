@@ -9,7 +9,6 @@ import 'MagazinePage.dart';
 import 'CalendarPage.dart';
 import 'ComparisonPage.dart';
 
-
 Future<void> main() async {
   await dotenv.load();
   runApp(CarForumApp());
@@ -41,11 +40,50 @@ class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
-
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoggedIn = false;
+  String _selectedLanguage = 'en'; // Default language
 
+  // Language selector state
+  final Map<String, String> languages = {
+    'en': 'English',
+    'hu': 'Magyar',
+  };
+
+  // Translations
+  final Map<String, Map<String, String>> translations = {
+    'en': {
+      'appTitle': 'The Car Magazin',
+      'home': 'Home',
+      'magazine': 'Magazine',
+      'forum': 'Forum',
+      'marketplace': 'Marketplace',
+      'raceSchedule': 'Race Schedule',
+      'comparison': 'Comparison',
+      'account': 'Account',
+      'profile': 'Profile',
+      'welcome': 'Welcome to The Car Magazin!',
+      'featuredCars': 'Featured Cars',
+      'recentPosts': 'Recent Forum Posts',
+      'languageChanged': 'Language changed to ',
+    },
+    'hu': {
+      'appTitle': 'The Car Magazin',
+      'home': 'Főoldal',
+      'magazine': 'Magazin',
+      'forum': 'Fórum',
+      'marketplace': 'Piactér',
+      'raceSchedule': 'Verseny Naptár',
+      'comparison': 'Összehasonlítás',
+      'account': 'Fiók',
+      'profile': 'Profil',
+      'welcome': 'Üdvözöljük az Autó Magazinban!',
+      'featuredCars': 'Kiemelt Autók',
+      'recentPosts': 'Legutóbbi Fórum Bejegyzések',
+      'languageChanged': 'Nyelv megváltoztatva ',
+    },
+  };
   @override
   void initState() {
     super.initState();
@@ -61,20 +99,65 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     // Get the width of the screen
     double width = MediaQuery.of(context).size.width;
     bool isMobile = width < 600;
 
+    // Language selector state
+    final Map<String, String> languages = {
+      'en': 'English',
+      'hu': 'Magyar',
+    };
+
+
+
+    void _changeLanguage(String languageCode) {
+      setState(() {
+        _selectedLanguage = languageCode;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${translations[_selectedLanguage]!['languageChanged']}${languages[languageCode]}')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('The Car Magazin'),
-        actions: isMobile ? [] : null, // Hide actions in mobile view
+        title: Text(translations[_selectedLanguage]!['appTitle']!),
+        actions: isMobile
+            ? [
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.language, color: Colors.white),
+                  onSelected: _changeLanguage,
+                  itemBuilder: (BuildContext context) {
+                    return languages.keys.map((String key) {
+                      return PopupMenuItem<String>(
+                        value: key,
+                        child: Text(languages[key]!),
+                      );
+                    }).toList();
+                  },
+                ),
+              ]
+            : [
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.language, color: Colors.white),
+                  onSelected: _changeLanguage,
+                  itemBuilder: (BuildContext context) {
+                    return languages.keys.map((String key) {
+                      return PopupMenuItem<String>(
+                        value: key,
+                        child: Text(languages[key]!),
+                      );
+                    }).toList();
+                  },
+                ),
+                const SizedBox(width: 16),
+              ],
       ),
-      drawer: isMobile ? _buildDrawer() : null, // Show Drawer only on mobile
+      drawer: isMobile ? _buildDrawer() : null,
       body: isMobile ? _buildMobileBody() : _buildDesktopBody(),
     );
   }
@@ -88,18 +171,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               MagazinePage(),
               ForumPage(),
               MarketplacePage(),
-              CalendarPage(),
-              ComparisonPage(),
-              AccountPage(),  // Csak akkor elérhető, ha be van jelentkezve
+              CalendarPage(selectedLanguage: _selectedLanguage),
+              ComparisonPage(selectedLanguage: _selectedLanguage),
+              AccountPage(),
             ]
           : [
               const Center(child: Text('Home Page')),
               MagazinePage(),
               ForumPage(),
               MarketplacePage(),
-              CalendarPage(),
-              ComparisonPage(),
-              ProfilePage(),  // Ha nincs bejelentkezve, akkor csak a ProfilePage érhető el
+              CalendarPage(selectedLanguage: _selectedLanguage),
+              ComparisonPage(selectedLanguage: _selectedLanguage),
+              ProfilePage(selectedLanguage: _selectedLanguage),
             ],
     );
   }
@@ -119,23 +202,23 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             fontWeight: FontWeight.bold,
           ),
           tabs: _isLoggedIn
-              ? const [
-                  Tab(text: 'Home'),
-                  Tab(text: 'Magazine'),
-                  Tab(text: 'Forum'),
-                  Tab(text: 'Marketplace'),
-                  Tab(text: 'F1 Overview'),
-                  Tab(text: 'Comparison'),
-                  Tab(text: 'Account'),  // Csak akkor elérhető, ha be van jelentkezve
+              ? [
+                  Tab(text: translations[_selectedLanguage]!['home']),
+                  Tab(text: translations[_selectedLanguage]!['magazine']),
+                  Tab(text: translations[_selectedLanguage]!['forum']),
+                  Tab(text: translations[_selectedLanguage]!['marketplace']),
+                  Tab(text: translations[_selectedLanguage]!['raceSchedule']),
+                  Tab(text: translations[_selectedLanguage]!['comparison']),
+                  Tab(text: translations[_selectedLanguage]!['account']),
                 ]
-              : const [
-                  Tab(text: 'Home'),
-                  Tab(text: 'Magazine'),
-                  Tab(text: 'Forum'),
-                  Tab(text: 'Marketplace'),
-                  Tab(text: 'F1 Overview'),
-                  Tab(text: 'Comparison'),
-                  Tab(text: 'Profile'),  // Ha nincs bejelentkezve, akkor csak a ProfilePage érhető el
+              : [
+                  Tab(text: translations[_selectedLanguage]!['home']),
+                  Tab(text: translations[_selectedLanguage]!['magazine']),
+                  Tab(text: translations[_selectedLanguage]!['forum']),
+                  Tab(text: translations[_selectedLanguage]!['marketplace']),
+                  Tab(text: translations[_selectedLanguage]!['raceSchedule']),
+                  Tab(text: translations[_selectedLanguage]!['comparison']),
+                  Tab(text: translations[_selectedLanguage]!['profile']),
                 ],
         ),
         Expanded(
@@ -147,18 +230,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     MagazinePage(),
                     ForumPage(),
                     MarketplacePage(),
-                    CalendarPage(),
-                    ComparisonPage(),
-                    AccountPage(),  // Csak akkor elérhető, ha be van jelentkezve
+                    CalendarPage(selectedLanguage: _selectedLanguage),
+                    ComparisonPage(selectedLanguage: _selectedLanguage),
+                    AccountPage(),
                   ]
                 : [
                     const Center(child: Text('Home Page')),
                     MagazinePage(),
                     ForumPage(),
                     MarketplacePage(),
-                    CalendarPage(),
-                    ComparisonPage(),
-                    ProfilePage(),  // Ha nincs bejelentkezve, akkor csak a ProfilePage érhető el
+                    CalendarPage(selectedLanguage: _selectedLanguage),
+                    ComparisonPage(selectedLanguage: _selectedLanguage),
+                    ProfilePage(selectedLanguage: _selectedLanguage),
                   ],
           ),
         ),
@@ -166,7 +249,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // Drawer a mobilhoz
   Widget _buildDrawer() {
     return Drawer(
       child: ListView(
@@ -188,52 +270,61 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ),
           ListTile(
-            title: const Text('Home'),
+            title: Text(translations[_selectedLanguage]!['home']!),
             onTap: () {
-              _tabController.index = 0; // Navigate to Home tab
-              Navigator.pop(context); // Close the drawer
-            },
-          ),
-          ListTile(
-            title: const Text('Magazine'),
-            onTap: () {
-              _tabController.index = 1; // Navigate to Magazine tab
+              _tabController.index = 0;
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: const Text('Forum'),
+            title: Text(translations[_selectedLanguage]!['magazine']!),
             onTap: () {
-              _tabController.index = 2; // Navigate to Forum tab
+              _tabController.index = 1;
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: const Text('Marketplace'),
+            title: Text(translations[_selectedLanguage]!['forum']!),
             onTap: () {
-              _tabController.index = 3; // Navigate to Marketplace tab
+              _tabController.index = 2;
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: const Text('Race Schedule'),
+            title: Text(translations[_selectedLanguage]!['marketplace']!),
             onTap: () {
-              _tabController.index = 4; // Navigate to Calendar tab
+              _tabController.index = 3;
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: const Text('Comparison'),
+            title: Text(translations[_selectedLanguage]!['raceSchedule']!),
             onTap: () {
-              _tabController.index = 5; // Navigate to Comparison tab
+              _tabController.index = 4;
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text(translations[_selectedLanguage]!['comparison']!),
+            onTap: () {
+              _tabController.index = 5;
               Navigator.pop(context);
             },
           ),
           if (!_isLoggedIn) ...[
             ListTile(
-              title: const Text('Profile'),
+              title: Text(translations[_selectedLanguage]!['profile']!),
               onTap: () {
-                _tabController.index = 6; // Navigate to Profile tab
+                _tabController.index = 6;
+                Navigator.pop(context);
+              },
+            ),
+          ],
+          if (_isLoggedIn) ...[
+            ListTile(
+              title: Text(translations[_selectedLanguage]!['account']!),
+              onTap: () {
+                _tabController.index = 6;
                 Navigator.pop(context);
               },
             ),

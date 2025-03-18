@@ -22,6 +22,15 @@
         "tags": [
           "Car"
         ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -36,7 +45,113 @@
         ],
         "parameters": [
           {
+            "name": "brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "model",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trim",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/cars/trims": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/cars/years": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trim",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/cars/images": {
+      "get": {
+        "tags": [
+          "Car"
+        ],
+        "parameters": [
+          {
+            "name": "genmodel_ID",
             "in": "query",
             "schema": {
               "type": "string"
@@ -105,70 +220,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Forum/brands": {
-      "get": {
-        "tags": [
-          "Forum"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Forum/models/{brand}": {
-      "get": {
-        "tags": [
-          "Forum"
-        ],
-        "parameters": [
-          {
-            "name": "brand",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Forum/years/{brand}/{model}": {
-      "get": {
-        "tags": [
-          "Forum"
-        ],
-        "parameters": [
-          {
-            "name": "brand",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "model",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Success"

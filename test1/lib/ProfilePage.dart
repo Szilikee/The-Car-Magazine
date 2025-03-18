@@ -6,7 +6,8 @@ import 'AccountPage.dart';
 import 'main.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final String selectedLanguage;
+  const ProfilePage({super.key, required this.selectedLanguage});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -18,38 +19,88 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isRegistering = false;
   bool _isLoggedIn = false;
   String _username = "";
+  Locale? _locale;
+  final AuthService _authService = AuthService();
+
+  final Map<String, Map<String, String>> translations = {
+    'en': {
+      'appBarTitle': 'Profile',
+      'chooseCategory': 'Register',
+      'chooseYear': 'Login',
+      'welcome': 'Welcome',
+      'logout': 'Logout',
+      'createAccount': 'Create an Account',
+      'loginAccount': 'Login to Your Account',
+      'email': 'Email',
+      'password': 'Password',
+      'register': 'Register',
+      'login': 'Login',
+      'alreadyHaveAccount': 'Already have an account? Login',
+      'dontHaveAccount': 'Don’t have an account? Register',
+      'logoutSuccess': 'Logged out successfully',
+      'loginSuccess': 'Login successful!',
+      'loginFailed': 'Login failed. Check your credentials.',
+      'fillFields': 'Please fill in all fields.',
+      'fetchUserError': 'Fetch User Data Failed',
+    },
+    'hu': {
+      'appBarTitle': 'Profil',
+      'chooseCategory': 'Regisztráció',
+      'chooseYear': 'Bejelentkezés',
+      'welcome': 'Üdvözlünk',
+      'logout': 'Kijelentkezés',
+      'createAccount': 'Fiók létrehozása',
+      'loginAccount': 'Bejelentkezés a fiókba',
+      'email': 'Email',
+      'password': 'Jelszó',
+      'register': 'Regisztráció',
+      'login': 'Bejelentkezés',
+      'alreadyHaveAccount': 'Van már fiókod? Jelentkezz be',
+      'dontHaveAccount': 'Nincs még fiókod? Regisztrálj',
+      'logoutSuccess': 'Sikeres kijelentkezés',
+      'loginSuccess': 'Sikeres bejelentkezés!',
+      'loginFailed': 'Sikertelen bejelentkezés. Ellenőrizd a hitelesítő adatokat.',
+      'fillFields': 'Töltsd ki az összes mezőt!',
+      'fetchUserError': 'Felhasználói adatok lekérése sikertelen',
+    },
+  };
 
   @override
   void initState() {
     super.initState();
+    _locale = Locale(widget.selectedLanguage);
     _checkLoginStatus();
   }
 
-  Future<void> _checkLoginStatus() async {
-    bool loggedIn = await AuthService().isUserLoggedIn();
-    if (loggedIn) {
+  @override
+  void didUpdateWidget(ProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
       setState(() {
-        _isLoggedIn = true;
+        _locale = Locale(widget.selectedLanguage);
       });
-      _fetchUserData();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AccountPage()),
-      );
     }
   }
 
-  void _registerUser() {
-    // Itt lehetne ellenőrizni az emailt, jelszót és regisztrálni a felhasználót
+  Future<void> _checkLoginStatus() async {
+    bool loggedIn = await _authService.isUserLoggedIn();
     setState(() {
-      _isLoggedIn = true;
-      _username = _emailController.text.split('@')[0]; // Példa: email első része lesz a felhasználónév
+      _isLoggedIn = loggedIn;
     });
+    if (loggedIn) {
+      await _fetchUserData();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AccountPage()),
+        );
+      }
+    }
   }
 
   Future<void> _fetchUserData() async {
-    final token = await AuthService().getToken();
-    final userId = await AuthService().getUserId();
+    final token = await _authService.getToken();
+    final userId = await _authService.getUserId();
 
     if (token != null && userId != null) {
       final response = await http.get(
@@ -63,6 +114,10 @@ class _ProfilePageState extends State<ProfilePage> {
           _username = responseData['username'];
           _emailController.text = responseData['email'];
         });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(translations[widget.selectedLanguage]!['fetchUserError']!)),
+        );
       }
     }
   }
@@ -70,89 +125,124 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loginUser() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-
     if (email.isEmpty || password.isEmpty) {
-      _showMessage('Please fill in all fields.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['fillFields']!)),
+      );
       return;
     }
-
-    try {
-      final response = await http.post(
-        Uri.parse('https://localhost:7164/api/Forum/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'password': password}),
+    bool success = await _authService.login(email, password);
+    if (success) {
+      setState(() => _isLoggedIn = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginSuccess']!)),
       );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        if (responseData.containsKey('token') && responseData.containsKey('userID')) {
-          await AuthService().saveUserCredentials(responseData['token'], responseData['userID']);
-          _showMessage('Login successful!');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        }
-      } else {
-        _showMessage('Login failed: ${response.statusCode}');
-      }
-    } catch (error) {
-      _showMessage('Network error: $error');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginFailed']!)),
+      );
     }
   }
 
-  Future<void> _logoutUser() async {
-    await AuthService().logout();
-    setState(() {
-      _isLoggedIn = false;
-    });
-    _showMessage('Logged out successfully');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const ProfilePage()),
+  Future<void> _registerUser() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['fillFields']!)),
+      );
+      return;
+    }
+    // Assuming AuthService has a register method; adjust as per your implementation
+    bool success = await _authService.register(email, password);
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginSuccess']!)),
+      );
+      setState(() => _isRegistering = false); // Switch back to login mode after successful registration
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginFailed']!)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String lang = _locale?.languageCode ?? 'en';
+    Map<String, String> t = translations[lang] ?? translations['en']!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isLoggedIn ? '${t['welcome']}, $_username' : (_isRegistering ? t['chooseCategory']! : t['chooseYear']!)),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isLoggedIn)
+                      ElevatedButton(
+                        onPressed: () async {
+                          await _authService.logout();
+                          setState(() => _isLoggedIn = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(t['logoutSuccess']!)),
+                          );
+                        },
+                        child: Text(t['logout']!),
+                      )
+                    else
+                      Column(
+                        children: [
+                          Text(
+                            _isRegistering ? t['createAccount']! : t['loginAccount']!,
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildTextField(_emailController, t['email']!),
+                          _buildTextField(_passwordController, t['password']!, isPassword: true),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: _isRegistering ? _registerUser : _loginUser,
+                            child: Text(_isRegistering ? t['register']! : t['login']!),
+                          ),
+                          const SizedBox(height: 10),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isRegistering = !_isRegistering;
+                              });
+                            },
+                            child: Text(
+                              _isRegistering ? t['alreadyHaveAccount']! : t['dontHaveAccount']!,
+                              style: const TextStyle(color: Colors.blueAccent),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(title: Text(_isLoggedIn ? 'Profile' : (_isRegistering ? 'Register' : 'Login'))),
-    body: Center(
-      child: _isLoggedIn
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Welcome, $_username'),
-                ElevatedButton(onPressed: _logoutUser, child: const Text('Logout')),
-              ],
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildTextField(_emailController, 'Email'),
-                _buildTextField(_passwordController, 'Password', isPassword: true),
-                ElevatedButton(
-                  onPressed: _isRegistering ? _registerUser : _loginUser,
-                  child: Text(_isRegistering ? 'Register' : 'Login'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isRegistering = !_isRegistering;
-                    });
-                  },
-                  child: Text(_isRegistering ? 'Already have an account? Login' : 'Don’t have an account? Register'),
-                ),
-              ],
-            ),
-    ),
-  );
-}
-
 
   Widget _buildTextField(TextEditingController controller, String label, {bool isPassword = false}) {
     return Padding(
@@ -162,7 +252,7 @@ Widget build(BuildContext context) {
         obscureText: isPassword,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
       ),
     );

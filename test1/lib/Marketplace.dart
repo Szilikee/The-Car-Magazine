@@ -48,27 +48,27 @@ class _MarketplacePageState extends State<MarketplacePage> {
     });
   }
 
-  Future<List<Car>> getCars() async {
-    const String apiUrl = 'https://localhost:7164/api/forum/carlistings';
+Future<List<Car>> getCars() async {
+  const String apiUrl = 'https://localhost:7164/api/marketplace/carlistings'; // Changed from localhost
 
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        List<Car> cars = data.map((carJson) => Car.fromJson(carJson)).toList();
-        allCars = cars;
-        filteredCars = cars;
-        return cars;
-      } else {
-        throw Exception('Failed to load cars');
-      }
-    } catch (e) {
-      setState(() {
-        statusMessage = 'Error loading data';
-      });
-      throw Exception('Error fetching data: $e');
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      List<Car> cars = data.map((carJson) => Car.fromJson(carJson)).toList();
+      allCars = cars;
+      filteredCars = cars;
+      return cars;
+    } else {
+      throw Exception('Failed to load cars: ${response.statusCode} - ${response.body}');
     }
+  } catch (e) {
+    setState(() {
+      statusMessage = 'Error loading data: $e';
+    });
+    throw Exception('Error fetching data: $e');
   }
+}
 
   Future<String> getCarImageFromAPI(String carName) async {
     final apiKey = dotenv.env['PEXELS_API_KEY']; // Kulcs betöltése

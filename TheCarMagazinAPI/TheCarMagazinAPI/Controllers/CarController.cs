@@ -17,7 +17,7 @@ namespace TheCarMagazinAPI.Controllers
             {
                 using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
-                var brands = connection.Query<string>("SELECT DISTINCT make FROM cars");
+                var brands = connection.Query<string>("SELECT DISTINCT Maker FROM cars_info");
                 return Ok(brands);
             }
             catch (Exception ex)
@@ -26,16 +26,19 @@ namespace TheCarMagazinAPI.Controllers
             }
         }
 
-        // Update your GetCarModels method to accept a brand
         [HttpGet("models")]
-        public IActionResult GetCarModels()
+        public IActionResult GetCarModels([FromQuery] string brand)
         {
             try
             {
                 using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
-                var models = connection.Query<string>(
-                    "SELECT DISTINCT CONCAT(make, ' ', model) AS FullModel FROM cars_info ORDER BY FullModel ASC");
+
+                var query = string.IsNullOrEmpty(brand)
+                    ? "SELECT DISTINCT Genmodel FROM cars_info ORDER BY Genmodel ASC"
+                    : "SELECT DISTINCT Genmodel FROM cars_info WHERE Maker = @Brand ORDER BY Genmodel ASC";
+
+                var models = connection.Query<string>(query, new { Brand = brand });
 
                 return Ok(models);
             }
@@ -45,21 +48,25 @@ namespace TheCarMagazinAPI.Controllers
             }
         }
 
-
-
         [HttpGet("details")]
-        public IActionResult GetCarDetails([FromQuery] string model)
+        public IActionResult GetCarDetails([FromQuery] string brand, [FromQuery] string model, [FromQuery] string trim, [FromQuery] int? year)
         {
             try
             {
                 using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
-                var carDetails = connection.QueryFirstOrDefault<CarDetails>(
-                    "SELECT * FROM cars_info WHERE model = @Model", new { Model = model });
+
+                var query = "SELECT * FROM cars_info WHERE Maker = @Brand AND Genmodel = @Model AND Trim = @Trim";
+                if (year.HasValue)
+                {
+                    query += " AND Year = @Year";
+                }
+
+                var carDetails = connection.QueryFirstOrDefault<CarDetails>(query, new { Brand = brand, Model = model, Trim = trim, Year = year });
 
                 if (carDetails == null)
                 {
-                    return NotFound("Car model not found.");
+                    return NotFound("Car details not found.");
                 }
 
                 return Ok(carDetails);
@@ -70,33 +77,84 @@ namespace TheCarMagazinAPI.Controllers
             }
         }
 
-        // CarDetails class for the car information
-        public class CarDetails
+        [HttpGet("trims")]
+        public IActionResult GetCarTrims([FromQuery] string brand, [FromQuery] string model)
         {
-            public int Id { get; set; }
-            public string Make { get; set; }
-            public string Model { get; set; }
-            public decimal Price { get; set; }
-            public int Year { get; set; }
-            public decimal Kilometer { get; set; }
-            public string FuelType { get; set; }
-            public string Transmission { get; set; }
-            public string Location { get; set; }
-            public string Color { get; set; }
-            public string Owner { get; set; }
-            public string SellerType { get; set; }
-            public string Engine { get; set; }
-            public string MaxPower { get; set; }
-            public string MaxTorque { get; set; }
-            public string Drivetrain { get; set; }
-            public decimal Length { get; set; }
-            public decimal Width { get; set; }
-            public decimal Height { get; set; }
-            public decimal SeatingCapacity { get; set; }
-            public decimal FuelTankCapacity { get; set; }
+            try
+            {
+                using var connection = new MySqlConnection(_connectionString);
+                connection.Open();
+                var trims = connection.Query<string>(
+                    "SELECT DISTINCT Trim FROM cars_info WHERE Maker = @Brand AND Genmodel = @Model",
+                    new { Brand = brand, Model = model });
+
+                return Ok(trims);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
+        [HttpGet("years")]
+        public IActionResult GetCarYears([FromQuery] string brand, [FromQuery] string model, [FromQuery] string trim)
+        {
+            try
+            {
+                using var connection = new MySqlConnection(_connectionString);
+                connection.Open();
+                var years = connection.Query<int>(
+                    "SELECT DISTINCT Year FROM cars_info WHERE Maker = @Brand AND Genmodel = @Model AND Trim = @Trim",
+                    new { Brand = brand, Model = model, Trim = trim });
 
+                return Ok(years);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
+        [HttpGet("images")]
+        public IActionResult GetCarImages([FromQuery] string genmodel_ID)
+        {
+            if (string.IsNullOrEmpty(genmodel_ID))
+            {
+                return BadRequest("genmodel_ID is required.");
+            }
+
+            try
+            {
+                using var connection = new MySqlConnection(_connectionString);
+                connection.Open();
+                var query = "SELECT Image_ID, Image_name FROM images_info WHERE Genmodel_ID = @GenmodelID";
+                var images = connection.Query<CarImage>(query, new { GenmodelID = genmodel_ID });
+
+                return Ok(images);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        public class CarDetails
+        {
+            public string Genmodel_ID { get; set; }
+            public string Maker { get; set; }
+            public string Genmodel { get; set; }
+            public string Trim { get; set; }
+            public int Year { get; set; }
+            public decimal Price { get; set; }
+            public int Gas_emission { get; set; }
+            public string Fuel_type { get; set; }
+            public int Engine_size { get; set; }
+        }
+
+        public class CarImage
+        {
+            public string Image_ID { get; set; }
+            public string Image_name { get; set; }
+        }
     }
 }
