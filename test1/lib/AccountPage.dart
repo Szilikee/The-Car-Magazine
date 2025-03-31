@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:my_car_forum/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'main.dart';
+import 'HomePage.dart';
 
 // Simple Topic model
 class Topic {
@@ -23,11 +25,57 @@ class Topic {
 }
 
 class AccountPage extends StatefulWidget {
-  const AccountPage({Key? key}) : super(key: key);
+  
+  final String selectedLanguage;
+  const AccountPage({super.key, required this.selectedLanguage});
 
   @override
   _AccountPageState createState() => _AccountPageState();
 }
+
+final Map<String, Map<String, String>> translations = {
+  'en': {
+    'AccountPageTitle': 'Account',
+    'fillFields': 'Please fill in all fields.',
+    'registrationSuccess': 'Registration successful!',
+    'registrationFailed': 'Registration failed. Please try again.',
+    'loginSuccess': 'Login successful!',
+    'loginFailed': 'Login failed. Please check your credentials.',
+    'logoutSuccess': 'You have been logged out.',
+    'changeProfileImage': 'Change Profile Image',
+    'bio': 'Bio',
+    'status': 'Status',
+    'saveChanges': 'Save Changes',
+    'logout': 'Logout',
+    'topicsCreated': 'Topics Created',
+    'noTopics': 'No topics created yet.',
+    'errorLoadingData': 'Error loading data.',
+    'updateSuccess': 'Profile updated successfully!',
+    'updateFailed': 'Profile update failed.',
+    'changeProfileImageFail': 'Unable to change profile picture.'
+  },
+  'hu': {
+    'AccountPageTitle': 'Fiók',
+    'fillFields': 'Kérlek töltsd ki az összes mezőt.',
+    'registrationSuccess': 'Sikeres regisztráció!',
+    'registrationFailed': 'A regisztráció sikertelen. Próbáld újra.',
+    'loginSuccess': 'Sikeres bejelentkezés!',
+    'loginFailed': 'Sikertelen bejelentkezés! Ellenőrizd az adataid.',
+    'logoutSuccess': 'Sikeresen kijelentkeztél.',
+    'changeProfileImage': 'Profilkép módosítása',
+    'changeProfileImageFail': 'Profilkép módositása nem lehetséges.',
+    'bio': 'Bemutatkozás',
+    'status': 'Állapot',
+    'saveChanges': 'Változtatások mentése',
+    'logout': 'Kijelentkezés',
+    'topicsCreated': 'Létrehozott témák',
+    'noTopics': 'Még nincs létrehozott téma.',
+    'errorLoadingData': 'Hiba történt az adatok betöltésekor.',
+    'updateSuccess': 'A profil sikeresen frissült!',
+    'updateFailed': 'A profil frissítése sikertelen volt.',
+  }
+};
+
 
 class _AccountPageState extends State<AccountPage> {
   String _username = '';
@@ -56,13 +104,13 @@ class _AccountPageState extends State<AccountPage> {
     print('UserID: $userId');
 
     if (token == null || token.isEmpty || userId == null) {
-      _showSnackBar('User not logged in.');
+      showWarning(context, 'User not logged in.');
       return;
     }
 
     try {
       final response = await http.get(
-        Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
+        Uri.parse('https://localhost:7164/api/User/userdetails/$userId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -84,11 +132,11 @@ class _AccountPageState extends State<AccountPage> {
           _statusController.text = _status;
         });
       } else {
-        _showSnackBar('Error loading user data: ${response.body}');
+        showFailed(context, 'Error loading user data: ${response.body}');
         print('Error: ${response.body}');
       }
     } catch (e) {
-      _showSnackBar('Request failed: $e');
+      showFailed(context, 'Request failed: $e');
       print('Request failed: $e');
     }
   }
@@ -99,7 +147,7 @@ class _AccountPageState extends State<AccountPage> {
     String? userId = prefs.getString('userID');
 
     if (token == null || userId == null) {
-      _showSnackBar('User not logged in.');
+      showWarning(context, 'User not logged in.');
       return;
     }
 
@@ -112,185 +160,191 @@ class _AccountPageState extends State<AccountPage> {
         },
       );
 
-      print('Topics Response Status Code: ${response.statusCode}');
-      print('Topics Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _createdTopics = data.map((json) => Topic.fromJson(json)).toList();
         });
       } else {
-        _showSnackBar('Error loading topics: ${response.body}');
-        print('Error: ${response.body}');
+        print('Error loading topics: ${response.body}');
       }
     } catch (e) {
-      _showSnackBar('Failed to load topics: $e');
+      showFailed(context, 'Failed to load topics: $e');
       print('Failed to load topics: $e');
     }
   }
 
   Future<void> _changeProfileImage() async {
     if (kIsWeb) {
-      _showSnackBar('Image picking is not supported on web.');
+      showFailed(context, translations[widget.selectedLanguage]!['changeProfileImageFail']!);
       return;
     }
   }
 
-  Future<void> _updateProfileData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final userId = prefs.getString('userID');
+Future<void> _updateProfileData() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final userId = prefs.getString('userID');
 
-    if (token == null || userId == null) {
-      _showSnackBar('User not logged in.');
-      return;
-    }
-
-    final response = await http.post(
-      Uri.parse('https://localhost:7164/api/forum/userdetails/update'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode({
-        'userId': userId,
-        'username': _username,
-        'email': _email,
-        'bio': _bioController.text,
-        'status': _statusController.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      _showSnackBar('Profile updated successfully!');
-      setState(() {
-        _bio = _bioController.text;
-        _status = _statusController.text;
-      });
-    } else {
-      _showSnackBar('Error: ${response.body}');
-      print('Error: ${response.body}');
-    }
+  if (token == null || userId == null) {
+    showFailed(context, translations[widget.selectedLanguage]!['loginFailed']!);  // Use localized login failed message
+    return;
   }
 
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+  final response = await http.post(
+    Uri.parse('https://localhost:7164/api/User/userdetails/update'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: json.encode({
+      'userId': userId,
+      'username': _username,
+      'email': _email,
+      'bio': _bioController.text,
+      'status': _statusController.text,
+    }),
+  );
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-      (Route<dynamic> route) => false,
-    );
+  if (response.statusCode == 200) {
+    showSuccess(context, translations[widget.selectedLanguage]!['updateSuccess']!);  // Use localized success message
+    setState(() {
+      _bio = _bioController.text;
+      _status = _statusController.text;
+    });
+  } else {
+    showFailed(context, translations[widget.selectedLanguage]!['updateFailed']!);  // Use localized error message
+    print('Error: ${response.body}');
   }
+}
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+Future<void> _logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear(); // Clear all shared preferences (including token and userID)
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Account Settings'),
-        backgroundColor: Colors.blueGrey.shade900,
+  // Navigate back to MainPage and remove all previous routes
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => const MainPage()),
+    (Route<dynamic> route) => false,
+  );
+}
+
+
+ @override
+Widget build(BuildContext context) {
+  String appBarTitle = translations[widget.selectedLanguage]!['AccountPageTitle']!;
+  String bioLabel = translations[widget.selectedLanguage]!['bio']!;
+  String statusLabel = translations[widget.selectedLanguage]!['status']!;
+  String saveChangesLabel = translations[widget.selectedLanguage]!['saveChanges']!;
+  String logoutLabel = translations[widget.selectedLanguage]!['logout']!;
+  String noTopicsLabel = translations[widget.selectedLanguage]!['noTopics']!;
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(
+        appBarTitle,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: _changeProfileImage,
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundImage: NetworkImage(_profileImageUrl),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: Icon(Icons.camera_alt, color: Colors.white, size: 22),
+      backgroundColor: Colors.blueGrey.shade900,
+      centerTitle: true,
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _changeProfileImage,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundImage: NetworkImage(_profileImageUrl),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Icon(Icons.camera_alt, color: Colors.white, size: 22),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _username,
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _email,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '$bioLabel: $_bio',
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Topics Created (${_createdTopics.length}):',
+              style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            _createdTopics.isEmpty
+                ? Text(
+                    noTopicsLabel,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  )
+                : Column(
+                    children: _createdTopics
+                        .map((topic) => ListTile(
+                              title: Text(
+                                topic.title,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              subtitle: Text(
+                                'Created: ${topic.createdAt.toLocal().toString().split('.')[0]}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ))
+                        .toList(),
                   ),
-                ),
+            const SizedBox(height: 20),
+            _buildTextField(
+              controller: _bioController,
+              label: bioLabel,
+              icon: Icons.info_outline,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _statusController,
+              label: statusLabel,
+              icon: Icons.tag,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: _updateProfileData,
+              icon: const Icon(Icons.save),
+              label: Text(saveChangesLabel),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
               ),
-              const SizedBox(height: 16),
-              Text(
-                _username,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: Text(logoutLabel),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
               ),
-              const SizedBox(height: 8),
-              Text(
-                _email,
-                style: const TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Bio: $_bio',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Topics Created (${_createdTopics.length}):',
-                style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              _createdTopics.isEmpty
-                  ? const Text(
-                      'No topics created yet.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    )
-                  : Column(
-                      children: _createdTopics
-                          .map((topic) => ListTile(
-                                title: Text(
-                                  topic.title,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                subtitle: Text(
-                                  'Created: ${topic.createdAt.toLocal().toString().split('.')[0]}',
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                controller: _bioController,
-                label: 'Bio',
-                icon: Icons.info_outline,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: _statusController,
-                label: 'Status',
-                icon: Icons.tag,
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: _updateProfileData,
-                icon: const Icon(Icons.save),
-                label: const Text('Save Changes'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _logout,
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildTextField({
     required TextEditingController controller,

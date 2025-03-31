@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'MagazinePage.dart';
 import 'CalendarPage.dart';
 import 'ComparisonPage.dart';
+import 'HomePage.dart';
 
 Future<void> main() async {
   await dotenv.load();
@@ -17,6 +18,7 @@ Future<void> main() async {
 String getApiKey() {
   return dotenv.env['PEXELS_API_KEY'] ?? 'ERROR: PEXELS API KEY IS NOT AVAILABLE!';
 }
+
 
 class CarForumApp extends StatelessWidget {
   const CarForumApp({super.key});
@@ -29,18 +31,20 @@ class CarForumApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         brightness: Brightness.dark,
       ),
-      home: HomePage(),
+      home: const MainPage(), // Rename HomePage to MainPage for clarity
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _MainPageState createState() => _MainPageState();
 }
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+
+class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoggedIn = false;
   String _selectedLanguage = 'en'; // Default language
@@ -50,6 +54,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     'en': 'English',
     'hu': 'Magyar',
   };
+
 
   // Translations
   final Map<String, Map<String, String>> translations = {
@@ -117,9 +122,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       setState(() {
         _selectedLanguage = languageCode;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${translations[_selectedLanguage]!['languageChanged']}${languages[languageCode]}')),
-      );
     }
 
     return Scaffold(
@@ -173,7 +175,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               MarketplacePage(),
               CalendarPage(selectedLanguage: _selectedLanguage),
               ComparisonPage(selectedLanguage: _selectedLanguage),
-              AccountPage(),
+              AccountPage(selectedLanguage: _selectedLanguage),
             ]
           : [
               const Center(child: Text('Home Page')),
@@ -226,16 +228,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             controller: _tabController,
             children: _isLoggedIn
                 ? [
-                    const Center(child: Text('Home Page')),
+                    HomePage(selectedLanguage: _selectedLanguage),
                     MagazinePage(),
                     ForumPage(),
                     MarketplacePage(),
                     CalendarPage(selectedLanguage: _selectedLanguage),
                     ComparisonPage(selectedLanguage: _selectedLanguage),
-                    AccountPage(),
+                    AccountPage(selectedLanguage: _selectedLanguage),
                   ]
                 : [
-                    const Center(child: Text('Home Page')),
+                    HomePage(selectedLanguage: _selectedLanguage),
                     MagazinePage(),
                     ForumPage(),
                     MarketplacePage(),

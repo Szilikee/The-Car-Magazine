@@ -293,7 +293,7 @@ class _ComparisonPageState extends State<ComparisonPage> {
           translations[widget.selectedLanguage]!['comparisonPageTitle']!,
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blueGrey.shade900,
         elevation: 2,
         centerTitle: true,
       ),

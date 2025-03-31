@@ -381,7 +381,7 @@ class _CalendarPageState extends State<CalendarPage> {
           Text(
             text,
             style: TextStyle(
-              color: isLink ? Colors.blue.shade700 : Colors.black, // Changed to black for better visibility
+              color: isLink ? Colors.blue.shade700 : Colors.white, // Changed to black for better visibility
               fontWeight: isLink ? FontWeight.bold : FontWeight.normal,
             ),
           ),

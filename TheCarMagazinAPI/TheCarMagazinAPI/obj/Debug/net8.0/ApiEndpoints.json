@@ -120,41 +120,46 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "Login",
-    "RelativePath": "api/Forum/login",
-    "HttpMethod": "POST",
+    "ContainingType": "ForumController",
+    "Method": "GetPosts",
+    "RelativePath": "api/forum/subtopics/{subtopicId}/posts",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userDto",
-        "Type": "TheCarMagazinAPI.Models.UserLoginDto",
+        "Name": "subtopicId",
+        "Type": "System.Int64",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "Register",
-    "RelativePath": "api/Forum/register",
+    "ContainingType": "ForumController",
+    "Method": "CreatePost",
+    "RelativePath": "api/forum/subtopics/{subtopicId}/posts",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userDto",
-        "Type": "TheCarMagazinAPI.Models.UserRegistrationDto",
+        "Name": "subtopicId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "postDto",
+        "Type": "PostDto",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "GetForumTopics",
-    "RelativePath": "api/Forum/topics",
+    "ContainingType": "ForumController",
+    "Method": "GetTopics",
+    "RelativePath": "api/forum/topics",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -162,32 +167,37 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "GetUserDetails",
-    "RelativePath": "api/Forum/userdetails/{userId}",
+    "ContainingType": "ForumController",
+    "Method": "GetSubtopics",
+    "RelativePath": "api/forum/topics/{topicId}/subtopics",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.Int32",
+        "Name": "topicId",
+        "Type": "System.Int64",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.ForumController",
-    "Method": "UpdateUserDetails",
-    "RelativePath": "api/Forum/userdetails/update",
+    "ContainingType": "ForumController",
+    "Method": "CreateSubtopic",
+    "RelativePath": "api/forum/topics/{topicId}/subtopics",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userDetailsDto",
-        "Type": "TheCarMagazinAPI.Models.UserDetailsDto",
+        "Name": "topicId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "subtopicDto",
+        "Type": "SubtopicDto",
         "IsRequired": true
       }
     ],
@@ -217,6 +227,70 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "Login",
+    "RelativePath": "api/User/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "TheCarMagazinAPI.Models.UserLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "Register",
+    "RelativePath": "api/User/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "TheCarMagazinAPI.Models.UserRegistrationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "GetUserDetails",
+    "RelativePath": "api/User/userdetails/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "UpdateUserDetails",
+    "RelativePath": "api/User/userdetails/update",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDetailsDto",
+        "Type": "TheCarMagazinAPI.Models.UserDetailsDto",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   }
 ]

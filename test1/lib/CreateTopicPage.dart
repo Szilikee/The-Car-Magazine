@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'auth_service.dart';
 
 class CreateTopicPage extends StatefulWidget {
   @override
@@ -8,46 +9,53 @@ class CreateTopicPage extends StatefulWidget {
 }
 
 class _CreateTopicPageState extends State<CreateTopicPage> {
-  final TextEditingController _topicTitleController = TextEditingController();
-  final TextEditingController _topicContentController = TextEditingController();
-
-  // Az autentikált felhasználó tokenjét itt kellene lekérni (pl. SharedPreferences)
-  // var _authToken = 'your_token';  // Token, amit a login során mentettél el
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   Future<void> _createTopic() async {
-    final title = _topicTitleController.text.trim();
-    final content = _topicContentController.text.trim();
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    final category = _categoryController.text.trim();
+    final token = await _authService.getToken();
 
-    if (title.isEmpty || content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
-      );
+    if (title.isEmpty || description.isEmpty || category.isEmpty) {
+      showWarning(context, 'Please fill in all fields.');
       return;
     }
 
-    // API hívás a fórumtéma létrehozásához
-    final response = await http.post(
-      Uri.parse('http://localhost:7164/api/forum/createTopic'),
-      headers: {
-        'Content-Type': 'application/json',
-        // 'Authorization': 'Bearer $_authToken',  // Ha szükséges a token
-      },
-      body: json.encode({
-        'title': title,
-        'content': content,
-      }),
-    );
+    if (token == null) {
+      showFailed(context, 'You must be logged in to create a topic.');
+      return;
+    }
 
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Topic created successfully!')),
+    try {
+      final response = await http.post(
+        Uri.parse('https://localhost:7164/api/forum/topics'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'topic': title,
+          'description': description,
+          'category': category,
+        }),
       );
-      _topicTitleController.clear();
-      _topicContentController.clear();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create topic: ${response.body}')),
-      );
+
+      print('Create Topic Response: ${response.statusCode} - ${response.body}');
+      if (response.statusCode == 201) {
+        showSuccess(context, 'Topic created successfully!');
+        _titleController.clear();
+        _descriptionController.clear();
+        _categoryController.clear();
+        Navigator.pop(context); // Go back to topics list
+      } else {
+        showFailed(context, 'Failed to create topic: ${response.body}');
+      }
+    } catch (e) {
+      showFailed(context, 'Error creating topic: $e');
     }
   }
 
@@ -62,16 +70,16 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildTextField(_topicTitleController, 'Topic Title'),
+            _buildTextField(_titleController, 'Topic Title'),
             const SizedBox(height: 16),
-            _buildTextField(_topicContentController, 'Topic Content'),
+            _buildTextField(_descriptionController, 'Description', maxLines: 3),
+            const SizedBox(height: 16),
+            _buildTextField(_categoryController, 'Category'),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _createTopic,
               child: const Text('Create Topic'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
             ),
           ],
         ),
@@ -79,21 +87,26 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label) {
+  Widget _buildTextField(TextEditingController controller, String label, {int maxLines = 1}) {
     return TextFormField(
       controller: controller,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.blueGrey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.lightBlueAccent),
-        ),
+        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueGrey)),
+        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.lightBlueAccent)),
         filled: true,
         fillColor: Colors.black38,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _categoryController.dispose();
+    super.dispose();
   }
 }

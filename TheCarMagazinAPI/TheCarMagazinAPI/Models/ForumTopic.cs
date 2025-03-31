@@ -1,9 +1,18 @@
-﻿namespace TheCarMagazinAPI.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Dapper; // Ensure this is included
+
+namespace TheCarMagazinAPI.Models
 {
     public class ForumTopic
     {
+        public int Id { get; set; }
         public string Topic { get; set; }
-        public string Description { get; set; }  // Hozzáadva
-        public DateTime CreatedAt { get; set; }   // Hozzáadva
+        public string Description { get; set; }
+        [Column("created_at")] // Explicitly map to the database column
+        public DateTime CreatedAt { get; set; }
     }
+
+    public class Topic { public long Id { get; set; } public string TopicName { get; set; } /* ... */ }
+    public class Subtopic { public long Id { get; set; } public long TopicId { get; set; } public string Title { get; set; } /* ... */ }
+    public class Post { public long Id { get; set; } public long SubtopicId { get; set; } public string Content { get; set; } /* ... */ }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_car_forum/ForumPage.dart';
 import 'dart:convert';
 import 'auth_service.dart';
 import 'AccountPage.dart';
 import 'main.dart';
+import 'HomePage.dart';
 
 class ProfilePage extends StatefulWidget {
   final String selectedLanguage;
@@ -40,8 +42,11 @@ class _ProfilePageState extends State<ProfilePage> {
       'logoutSuccess': 'Logged out successfully',
       'loginSuccess': 'Login successful!',
       'loginFailed': 'Login failed. Check your credentials.',
+      'registrationSuccess': 'Registration successfull! Please log in.',
+      'registrationFailed': 'Registration failed!',
       'fillFields': 'Please fill in all fields.',
       'fetchUserError': 'Fetch User Data Failed',
+      'username' : 'Username'
     },
     'hu': {
       'appBarTitle': 'Profil',
@@ -59,9 +64,12 @@ class _ProfilePageState extends State<ProfilePage> {
       'dontHaveAccount': 'Nincs még fiókod? Regisztrálj',
       'logoutSuccess': 'Sikeres kijelentkezés',
       'loginSuccess': 'Sikeres bejelentkezés!',
+      'registrationSuccess': 'Regisztráció sikeres! Kérjük, lépjen be.',
+      'registrationFailed': 'Regisztráció sikertelen!',
       'loginFailed': 'Sikertelen bejelentkezés. Ellenőrizd a hitelesítő adatokat.',
       'fillFields': 'Töltsd ki az összes mezőt!',
       'fetchUserError': 'Felhasználói adatok lekérése sikertelen',
+      'username' : 'Felhasználónév'
     },
   };
 
@@ -82,6 +90,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+
+
+
+
+
   Future<void> _checkLoginStatus() async {
     bool loggedIn = await _authService.isUserLoggedIn();
     setState(() {
@@ -92,157 +105,167 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AccountPage()),
+          MaterialPageRoute(builder: (context) => MainPage(),
+          ),
         );
       }
     }
   }
 
-  Future<void> _fetchUserData() async {
-    final token = await _authService.getToken();
-    final userId = await _authService.getUserId();
+Future<void> _fetchUserData() async {
+  final token = await _authService.getToken();
+  final userId = await _authService.getUserId();
 
-    if (token != null && userId != null) {
-      final response = await http.get(
-        Uri.parse('https://localhost:7164/api/forum/userdetails/$userId'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+  if (token != null && userId != null) {
+    final response = await http.get(
+      Uri.parse('https://localhost:7164/api/User/userdetails/$userId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (mounted) {  // Ellenőrizd, hogy a widget még aktív
         setState(() {
           _username = responseData['username'];
           _emailController.text = responseData['email'];
         });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(translations[widget.selectedLanguage]!['fetchUserError']!)),
-        );
+      }
+    } else {
+      if (mounted) {  // Ha a widget még aktív, akkor mutasd az error üzenetet
+        showFailed(context, translations[widget.selectedLanguage]!['fetchUserError']!);
       }
     }
   }
+}
 
-  Future<void> _loginUser() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['fillFields']!)),
-      );
-      return;
-    }
-    bool success = await _authService.login(email, password);
-    if (success) {
-      setState(() => _isLoggedIn = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginSuccess']!)),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginFailed']!)),
-      );
-    }
+Future<void> _loginUser() async {
+  final username = _usernameController.text.trim();
+  final password = _passwordController.text.trim();
+
+  if (username.isEmpty || password.isEmpty) {
+    showWarning(context, translations[widget.selectedLanguage]!['fillFields']!);
+    return;
   }
 
-  Future<void> _registerUser() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['fillFields']!)),
-      );
-      return;
-    }
-    // Assuming AuthService has a register method; adjust as per your implementation
-    bool success = await _authService.register(email, password);
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginSuccess']!)),
-      );
-      setState(() => _isRegistering = false); // Switch back to login mode after successful registration
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(translations[widget.selectedLanguage]!['loginFailed']!)),
-      );
-    }
+  bool success = await _authService.login(username, password);
+
+  if (success) {
+    setState(() => _isLoggedIn = true);
+    showSuccess(context, translations[widget.selectedLanguage]!['loginSuccess']!);
+    await _checkLoginStatus(); // Trigger navigation via _checkLoginStatus
+  } else {
+    showFailed(context, translations[widget.selectedLanguage]!['loginFailed']!);
+  }
+}
+
+
+final TextEditingController _usernameController = TextEditingController(); // Új kontroller a felhasználónévhez
+
+Future<void> _registerUser() async {
+  final username = _usernameController.text.trim(); // Felhasználónév bekérése
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
+
+  if (username.isEmpty || email.isEmpty || password.isEmpty) {
+  showWarning(context, translations[widget.selectedLanguage]!['fillFields']!);
+  return;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    String lang = _locale?.languageCode ?? 'en';
-    Map<String, String> t = translations[lang] ?? translations['en']!;
+  final response = await http.post(
+    Uri.parse('https://localhost:7164/api/User/register'),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({"username": username, "email": email, "password": password}),
+  );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLoggedIn ? '${t['welcome']}, $_username' : (_isRegistering ? t['chooseCategory']! : t['chooseYear']!)),
+  print("API Response: ${response.statusCode} - ${response.body}");
+
+  if (response.statusCode == 201) {
+    showSuccess(context, translations[widget.selectedLanguage]!['registrationSuccess']!);
+    setState(() => _isRegistering = false);
+  } else {
+    showFailed(context, translations[widget.selectedLanguage]!['registrationSuccess']!);
+  }
+}
+
+@override
+Widget build(BuildContext context) {
+  String lang = _locale?.languageCode ?? 'en';
+  Map<String, String> t = translations[lang] ?? translations['en']!;
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(_isLoggedIn
+          ? '${t['welcome']}, $_username'
+          : (_isRegistering ? t['chooseCategory']! : t['chooseYear']!)),
+        backgroundColor: Colors.blueGrey.shade900,
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_isLoggedIn)
-                      ElevatedButton(
-                        onPressed: () async {
-                          await _authService.logout();
-                          setState(() => _isLoggedIn = false);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(t['logoutSuccess']!)),
-                          );
-                        },
-                        child: Text(t['logout']!),
-                      )
-                    else
-                      Column(
-                        children: [
-                          Text(
-                            _isRegistering ? t['createAccount']! : t['loginAccount']!,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    ),
+    body: SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_isLoggedIn)
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _authService.logout();
+                        setState(() => _isLoggedIn = false);
+                        showSuccess(context, translations[widget.selectedLanguage]!['logoutSuccess']!);
+                      },
+                      child: Text(t['logout']!),
+                    )
+                  else
+                    Column(
+                      children: [
+                        Text(
+                          _isRegistering ? t['createAccount']! : t['loginAccount']!,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Csak regisztrációkor kérjük az e-mailt
+                        if (_isRegistering) _buildTextField(_emailController, t['email']!),
+
+                        _buildTextField(_usernameController, t['username']!), // Felhasználónév mező
+                        _buildTextField(_passwordController, t['password']!, isPassword: true),
+
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _isRegistering ? _registerUser : _loginUser,
+                          child: Text(_isRegistering ? t['register']! : t['login']!),
+                        ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isRegistering = !_isRegistering;
+                            });
+                          },
+                          child: Text(
+                            _isRegistering ? t['alreadyHaveAccount']! : t['dontHaveAccount']!,
+                            style: const TextStyle(color: Colors.blueAccent),
                           ),
-                          const SizedBox(height: 20),
-                          _buildTextField(_emailController, t['email']!),
-                          _buildTextField(_passwordController, t['password']!, isPassword: true),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _isRegistering ? _registerUser : _loginUser,
-                            child: Text(_isRegistering ? t['register']! : t['login']!),
-                          ),
-                          const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isRegistering = !_isRegistering;
-                              });
-                            },
-                            child: Text(
-                              _isRegistering ? t['alreadyHaveAccount']! : t['dontHaveAccount']!,
-                              style: const TextStyle(color: Colors.blueAccent),
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildTextField(TextEditingController controller, String label, {bool isPassword = false}) {
     return Padding(
