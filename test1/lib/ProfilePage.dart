@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_car_forum/ForumPage.dart';
 import 'dart:convert';
 import 'auth_service.dart';
-import 'AccountPage.dart';
 import 'main.dart';
-import 'HomePage.dart';
 
 class ProfilePage extends StatefulWidget {
   final String selectedLanguage;

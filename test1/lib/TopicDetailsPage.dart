@@ -3,12 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'auth_service.dart';
-import 'SubTopicDetailsPage.dart'; // New page for discussion
+import 'SubTopicDetailsPage.dart';
+import 'CreateSubTopicPage.dart';
 
 class TopicDetailsPage extends StatefulWidget {
   final Map<String, dynamic> topic;
 
-  const TopicDetailsPage({Key? key, required this.topic}) : super(key: key);
+  const TopicDetailsPage({super.key, required this.topic});
 
   @override
   _TopicDetailsPageState createState() => _TopicDetailsPageState();
@@ -16,92 +17,69 @@ class TopicDetailsPage extends StatefulWidget {
 
 class _TopicDetailsPageState extends State<TopicDetailsPage> {
   List<Map<String, dynamic>> _subtopics = [];
+  List<Map<String, dynamic>> _filteredSubtopics = [];
   bool _isLoading = true;
   bool _isLoggedIn = false;
-  final TextEditingController _subtopicController = TextEditingController();
   final AuthService _authService = AuthService();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
     _fetchSubtopics();
+    _searchController.addListener(_filterSubtopics);
   }
 
- Future<void> _checkLoginStatus() async {
-  final loggedIn = await _authService.isUserLoggedIn();
-  if (mounted) setState(() => _isLoggedIn = loggedIn);
-}
-
-Future<void> _fetchSubtopics() async {
-  final topicId = widget.topic['id'];
-  print('Fetching subtopics for Topic ID: $topicId');
-  if (topicId == null) {
-    if (mounted) setState(() => _isLoading = false);
-    return;
+  Future<void> _checkLoginStatus() async {
+    final loggedIn = await _authService.isUserLoggedIn();
+    if (mounted) setState(() => _isLoggedIn = loggedIn);
   }
 
-  try {
-    final token = await _authService.getToken();
-    final response = await http.get(
-      Uri.parse('https://localhost:7164/api/forum/topics/$topicId/subtopics'),
-      headers: {if (token != null) 'Authorization': 'Bearer $token'},
-    );
-    print('Fetch Subtopics Response: ${response.statusCode} - ${response.body}');
-    if (response.statusCode == 200 && mounted) {
-      setState(() {
-        _subtopics = List<Map<String, dynamic>>.from(json.decode(response.body));
-        _isLoading = false;
-      });
-    } else {
-      showFailed(context, 'Failed to load subtopics: ${response.statusCode} - ${response.body}');
-      if (mounted) setState(() => _isLoading = false);
-    }
-  } catch (e) {
-    showFailed(context, 'Error fetching subtopics: $e');
-    if (mounted) setState(() => _isLoading = false);
-  }
-}
-
-
-  Future<void> _createSubtopic() async {
-    if (_subtopicController.text.trim().isEmpty) {
-      showWarning(context, 'Subtopic title cannot be empty');
-      return;
-    }
-
-    final token = await _authService.getToken();
+  Future<void> _fetchSubtopics() async {
     final topicId = widget.topic['id'];
-
-    if (token == null || topicId == null) {
-      showFailed(context, 'Authentication error');
+    print('Fetching subtopics for Topic ID: $topicId');
+    if (topicId == null) {
+      showFailed(context, 'Invalid topic ID');
+      if (mounted) setState(() => _isLoading = false);
       return;
     }
-
     try {
-      final response = await http.post(
-        Uri.parse('https://localhost:7164/api/forum/topics/$topicId/subtopics'), // Adjusted endpoint
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({
-          'title': _subtopicController.text.trim(),
-          'description': '', // Add description field if needed
-        }),
+      final token = await _authService.getToken();
+      final response = await http.get(
+        Uri.parse('https://localhost:7164/api/forum/topics/$topicId/subtopics'),
+        headers: {if (token != null) 'Authorization': 'Bearer $token'},
       );
-
-      print('Create Subtopic Response: ${response.statusCode} - ${response.body}');
-      if (response.statusCode == 201) {
-        showSuccess(context, 'Subtopic created successfully');
-        _subtopicController.clear();
-        await _fetchSubtopics();
+      print('Fetch Subtopics Response: ${response.statusCode} - ${response.body}');
+      if (response.statusCode == 200 && mounted) {
+        setState(() {
+          _subtopics = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _subtopics.sort((a, b) {
+            final dateA = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime(1970);
+            final dateB = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime(1970);
+            return dateB.compareTo(dateA);
+          });
+          _filteredSubtopics = _subtopics;
+          _isLoading = false;
+        });
       } else {
-        showFailed(context, 'Failed to create subtopic: ${response.statusCode} - ${response.body}');
+        showFailed(context, 'Failed to load subtopics: ${response.statusCode}');
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      showFailed(context, 'Error creating subtopic: $e');
+      showFailed(context, 'Error fetching subtopics: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _filterSubtopics() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredSubtopics = _subtopics.where((subtopic) {
+        final title = subtopic['title']?.toString().toLowerCase() ?? '';
+        return title.contains(query);
+      }).toList();
+    });
   }
 
   @override
@@ -116,36 +94,76 @@ Future<void> _fetchSubtopics() async {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Category: ${widget.topic['category'] ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
+            Text(
+              'Category: ${widget.topic['category'] ?? 'N/A'}',
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text(widget.topic['description'] ?? 'No description', style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            Text('Posted on: ${widget.topic['createdAt'] ?? 'N/A'} by ${widget.topic['username'] ?? 'Unknown'}',
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(
+              widget.topic['description'] ?? 'No description',
+              style: const TextStyle(fontSize: 25),
+            ),
             const SizedBox(height: 20),
-            const Text('Subtopics', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            if (_isLoggedIn) ...[
-              TextField(
-                controller: _subtopicController,
-                decoration: InputDecoration(
-                  labelText: 'Add a subtopic...',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: _createSubtopic),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Subtopics',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                maxLines: 1,
+                if (_isLoggedIn)
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CreateSubtopicPage(topicId: widget.topic['id']),
+                        ),
+                      );
+                      if (result == true) {
+                        _fetchSubtopics();
+                        Navigator.pop(context, true);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Create New Subtopic',
+                      style: TextStyle(fontSize: 14),
+                      selectionColor: Colors.white,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search subtopics...',
+                hintStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
               ),
-              const SizedBox(height: 20),
-            ],
+            ),
+            const SizedBox(height: 10),
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _subtopics.isEmpty
-                    ? const Text('No subtopics yet', style: TextStyle(color: Colors.grey))
+                : _filteredSubtopics.isEmpty
+                    ? const Text('No subtopics found', style: TextStyle(color: Colors.grey))
                     : Expanded(
                         child: ListView.builder(
-                          itemCount: _subtopics.length,
+                          itemCount: _filteredSubtopics.length,
                           itemBuilder: (context, index) {
-                            final subtopic = _subtopics[index];
+                            final subtopic = _filteredSubtopics[index];
                             final title = subtopic['title'] ?? 'No title';
                             String formattedDate = 'N/A';
                             if (subtopic['createdAt'] != null) {
@@ -157,12 +175,25 @@ Future<void> _fetchSubtopics() async {
                               }
                             }
                             return Card(
-                              elevation: 1,
+                              elevation: 2,
                               margin: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                               child: ListTile(
-                                title: Text(title),
-                                subtitle: Text('Posted on: $formattedDate by ${subtopic['username'] ?? 'Unknown'}',
-                                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                title: Text(
+                                  title,
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                                subtitle: Text(
+                                  'Posted on: $formattedDate by ${subtopic['username'] ?? 'Unknown'}',
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                ),
+                                trailing: const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -184,7 +215,25 @@ Future<void> _fetchSubtopics() async {
 
   @override
   void dispose() {
-    _subtopicController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
+}
+
+void showFailed(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.red),
+  );
+}
+
+void showWarning(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.orange),
+  );
+}
+
+void showSuccess(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.green),
+  );
 }

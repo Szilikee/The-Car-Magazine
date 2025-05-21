@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'auth_service.dart';
 
 class CreateTopicPage extends StatefulWidget {
+  const CreateTopicPage({super.key});
+
   @override
   _CreateTopicPageState createState() => _CreateTopicPageState();
 }
@@ -13,6 +15,7 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _categoryController = TextEditingController();
   final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   Future<void> _createTopic() async {
     final title = _titleController.text.trim();
@@ -30,6 +33,7 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
       return;
     }
 
+    setState(() => _isLoading = true);
     try {
       final response = await http.post(
         Uri.parse('https://localhost:7164/api/forum/topics'),
@@ -50,12 +54,14 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
         _titleController.clear();
         _descriptionController.clear();
         _categoryController.clear();
-        Navigator.pop(context); // Go back to topics list
+        Navigator.pop(context, true); // Trigger refresh in TopicsListPage
       } else {
         showFailed(context, 'Failed to create topic: ${response.body}');
       }
     } catch (e) {
       showFailed(context, 'Error creating topic: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -76,11 +82,22 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
             const SizedBox(height: 16),
             _buildTextField(_categoryController, 'Category'),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _createTopic,
-              child: const Text('Create Topic'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-            ),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _createTopic,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Create Topic',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -109,4 +126,22 @@ class _CreateTopicPageState extends State<CreateTopicPage> {
     _categoryController.dispose();
     super.dispose();
   }
+}
+
+void showFailed(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.red),
+  );
+}
+
+void showWarning(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.orange),
+  );
+}
+
+void showSuccess(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.green),
+  );
 }

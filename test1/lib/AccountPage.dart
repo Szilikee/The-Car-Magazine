@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'main.dart';
-import 'HomePage.dart';
 
 // Simple Topic model
 class Topic {

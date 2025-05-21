@@ -177,6 +177,29 @@
         }
       }
     },
+    "/api/forum/topics/{topicId}": {
+      "get": {
+        "tags": [
+          "Forum"
+        ],
+        "parameters": [
+          {
+            "name": "topicId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/forum/topics/{topicId}/subtopics": {
       "get": {
         "tags": [
@@ -261,7 +284,9 @@
             "description": "Success"
           }
         }
-      },
+      }
+    },
+    "/api/forum/topics/{subtopicId}/posts": {
       "post": {
         "tags": [
           "Forum"
@@ -512,6 +537,11 @@
         "properties": {
           "content": {
             "type": "string",
+            "nullable": true
+          },
+          "parentPostId": {
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           }
         },

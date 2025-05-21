@@ -137,8 +137,18 @@
   },
   {
     "ContainingType": "ForumController",
+    "Method": "GetTopics",
+    "RelativePath": "api/forum/topics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ForumController",
     "Method": "CreatePost",
-    "RelativePath": "api/forum/subtopics/{subtopicId}/posts",
+    "RelativePath": "api/forum/topics/{subtopicId}/posts",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -158,12 +168,18 @@
   },
   {
     "ContainingType": "ForumController",
-    "Method": "GetTopics",
-    "RelativePath": "api/forum/topics",
+    "Method": "GetTopicById",
+    "RelativePath": "api/forum/topics/{topicId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "topicId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
