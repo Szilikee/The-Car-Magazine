@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchRecentCars() async {
-    const String apiUrl = 'https://localhost:7164/api/marketplace/carlistings';
+    const String apiUrl = 'https://localhost:7164/api/forum/carlistings';
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -67,8 +67,6 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _recentCars = data.map((carJson) => Car.fromJson(carJson)).take(5).toList(); // Limit to 5 cars
         });
-      } else {
-        print('Failed to load cars: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching cars: $e');
@@ -154,7 +152,7 @@ Widget build(BuildContext context) {
               ),
             ),
             SizedBox(
-              height: 280,
+              height: 400,
               child: _recentCars.isEmpty
                   ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
                   : ListView.builder(
@@ -235,77 +233,75 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildFeaturedCarCard(Car car) {
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Card(
-        elevation: 6,
-        color: Colors.grey.shade800,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: FutureBuilder<String>(
-                future: _getCarImageFromAPI(car.title),
-                builder: (context, snapshot) {
-                  return Image.network(
-                    snapshot.data ?? 'https://via.placeholder.com/250x120',
-                    height: 160,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.network(
-                      'https://via.placeholder.com/250x120',
-                      height: 160,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
+ Widget _buildFeaturedCarCard(Car car) {
+  return Container(
+    width: 280,
+    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    child: Card(
+      elevation: 6,
+      color: Colors.grey.shade800,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Image.network(
+              car.imagePath.isNotEmpty
+                  ? car.imagePath
+                  : 'https://via.placeholder.com/250x120',
+              height: 280,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Image.network(
+                'https://via.placeholder.com/250x120',
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${car.title} - ${car.year}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${car.title} - ${car.year}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${car.mileage} km • ${car.transmission}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${car.mileage} km • ${car.transmission}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${car.price} €',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${car.price} €',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildForumPostCard(BuildContext context, Map<String, dynamic> topic) {
     final title = topic['topic'] ?? 'N/A';
@@ -376,7 +372,7 @@ Widget build(BuildContext context) {
   }
 }
 
-// Car class from MarketplacePage
+
 class Car {
   final String title;
   final int year;
@@ -401,16 +397,20 @@ class Car {
   });
 
   factory Car.fromJson(Map<String, dynamic> json) {
+    print('Parsing JSON: $json');
     return Car(
-      title: json['name'] ?? 'Unknown Car',
-      year: json['year'] ?? 0,
-      price: json['sellingPrice'] ?? 0,
-      mileage: json['kmDriven'] ?? 0,
-      fuel: json['fuel'] ?? 'Unknown',
-      imagePath: json['imageUrl'] ?? '',
-      location: json['sellerType'] ?? 'Unknown',
-      transmission: json['transmission'] ?? 'Unknown',
-      owner: json['owner']?.trim() ?? 'Unknown',
+      title: json['name']?.toString() ?? 'Unknown Car',
+      year: json['year']?.toInt() ?? 0,
+      price: (json['sellingPrice']?.toDouble() ?? json['selling_price']?.toDouble() ?? 0).toInt(),
+      mileage: json['kmDriven']?.toInt() ?? json['km_driven']?.toInt() ?? 0,
+      fuel: json['fuel']?.toString() ?? 'Unknown',
+      imagePath: json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '',
+      location: json['sellerType']?.toString() ?? json['seller_type']?.toString() ?? 'Unknown',
+      transmission: json['transmission']?.toString() ?? 'Unknown',
+      owner: json['owner']?.toString().trim() ?? 'Unknown',
     );
   }
+
+  @override
+  String toString() => 'Car(title: $title, year: $year, price: $price, imagePath: $imagePath)';
 }

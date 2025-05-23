@@ -120,6 +120,32 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "AddCar",
+    "RelativePath": "api/forum/addcar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TheCarMagazinAPI.Models.CarListing",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "GetCarListings",
+    "RelativePath": "api/forum/carlistings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ForumController",
     "Method": "GetPosts",
     "RelativePath": "api/forum/subtopics/{subtopicId}/posts",
@@ -217,32 +243,6 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
-    "Method": "AddCar",
-    "RelativePath": "api/Marketplace/addcar",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "model",
-        "Type": "TheCarMagazinAPI.Controllers.CarListing",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
-    "Method": "GetCarListings",
-    "RelativePath": "api/Marketplace/carlistings",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
     "ReturnTypes": []
   },
   {

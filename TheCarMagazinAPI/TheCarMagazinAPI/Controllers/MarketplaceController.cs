@@ -1,16 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using Dapper;
+using TheCarMagazinAPI.Models;
+using System.Text.Json;
 
 namespace TheCarMagazinAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/forum")]
     [ApiController]
     public class MarketplaceController : ControllerBase
     {
-        private readonly string _connectionString = "Server=127.0.0.1;Database=car_database;User ID=root;Password=1234;";
+        private readonly string _connectionString;
 
-        // ====== Autó hirdetések ======
+        public MarketplaceController(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? "Server=127.0.0.1;Database=car_database;User ID=root;Password=1234;";
+            Console.WriteLine($"Connection string: {_connectionString}");
+        }
 
         [HttpGet("carlistings")]
         public IActionResult GetCarListings()
@@ -19,123 +26,103 @@ namespace TheCarMagazinAPI.Controllers
             {
                 using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
+                Console.WriteLine("Database connection opened successfully");
 
-                // SQL lekérdezés
+                // Check current database
+                var currentDb = connection.Query<string>("SELECT DATABASE()").FirstOrDefault();
+                Console.WriteLine($"Current database: {currentDb}");
+
+                // Check available tables
+                var tables = connection.Query<string>("SHOW TABLES").ToList();
+                Console.WriteLine($"Tables in database: {JsonSerializer.Serialize(tables)}");
+
+                // Explicit query with column aliases
                 var carListings = connection.Query<CarListing>(
-                    "SELECT id, name, year, selling_price, km_driven, fuel, seller_type, transmission, owner FROM car_listings");
+                    @"SELECT 
+                        id AS Id, 
+                        name AS Name, 
+                        year AS Year, 
+                        selling_price AS SellingPrice, 
+                        km_driven AS KmDriven, 
+                        fuel AS Fuel, 
+                        seller_type AS SellerType, 
+                        transmission AS Transmission, 
+                        owner AS Owner, 
+                        image_url AS ImageUrl 
+                      FROM car_listings_new");
+                Console.WriteLine($"Raw query result: {JsonSerializer.Serialize(carListings)}");
 
-                // DTO-ként történő visszaadás
+                // Map to DTO
                 var carListingsDto = carListings.Select(car => new CarListingDto
                 {
                     Id = car.Id,
                     Name = car.Name,
                     Year = car.Year,
-                    SellingPrice = car.selling_price,
-                    KmDriven = car.km_driven,
+                    SellingPrice = car.SellingPrice,
+                    KmDriven = car.KmDriven,
                     Fuel = car.Fuel,
-                    SellerType = car.seller_type ?? "Unknown",
+                    SellerType = car.SellerType ?? "Unknown",
                     Transmission = car.Transmission,
-                    Owner = car.Owner?.Trim() ?? "Unknown"
+                    Owner = car.Owner?.Trim() ?? "Unknown",
+                    ImageUrl = car.ImageUrl
                 }).ToList();
+                Console.WriteLine($"DTO result: {JsonSerializer.Serialize(carListingsDto)}");
 
                 return Ok(carListingsDto);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in GetCarListings: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
-        // ====== Új autó hirdetés hozzáadása ======
 
         [HttpPost("addcar")]
         public async Task<IActionResult> AddCar([FromBody] CarListing model)
         {
             try
             {
-                // Validáció
-                if (model == null)
-                    return BadRequest("A kérés érvénytelen.");
-
-                if (string.IsNullOrEmpty(model.Name))
-                    return BadRequest("A név megadása kötelező.");
-
-                if (model.Year <= 0)
-                    return BadRequest("Az év megadása kötelező.");
-
-                if (model.selling_price <= 0)
-                    return BadRequest("Az eladási ár megadása kötelező.");
-
-                if (model.km_driven <= 0)
-                    return BadRequest("A futásteljesítmény megadása kötelező.");
-
-                if (string.IsNullOrEmpty(model.Fuel))
-                    return BadRequest("Az üzemanyag típusa kötelező.");
-
-                if (string.IsNullOrEmpty(model.seller_type))
-                    return BadRequest("Az eladó típusa kötelező.");
-
-                if (string.IsNullOrEmpty(model.Transmission))
-                    return BadRequest("A váltó típusa kötelező.");
-
-                if (string.IsNullOrEmpty(model.Owner))
-                    return BadRequest("Az előző tulajdonos információja kötelező.");
+                if (model == null) return BadRequest("Invalid request.");
+                if (string.IsNullOrEmpty(model.Name)) return BadRequest("Name is required.");
+                if (model.Year <= 0) return BadRequest("Year is required.");
+                if (model.SellingPrice <= 0) return BadRequest("Selling price is required.");
+                if (model.KmDriven <= 0) return BadRequest("Mileage is required.");
+                if (string.IsNullOrEmpty(model.Fuel)) return BadRequest("Fuel type is required.");
+                if (string.IsNullOrEmpty(model.SellerType)) return BadRequest("Seller type is required.");
+                if (string.IsNullOrEmpty(model.Transmission)) return BadRequest("Transmission is required.");
+                if (string.IsNullOrEmpty(model.Owner)) return BadRequest("Owner information is required.");
 
                 using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
+                Console.WriteLine($"Adding car: {JsonSerializer.Serialize(model)}");
 
-                // SQL lekérdezés
-                var query = @"INSERT INTO car_listings (name, year, selling_price, km_driven, fuel, seller_type, transmission, owner) 
-                            VALUES (@Name, @Year, @SellingPrice, @KmDriven, @Fuel, @SellerType, @Transmission, @Owner)";
+                var query = @"INSERT INTO car_listings_new 
+                    (name, year, selling_price, km_driven, fuel, seller_type, transmission, owner, image_url) 
+                    VALUES (@Name, @Year, @SellingPrice, @KmDriven, @Fuel, @SellerType, @Transmission, @Owner, @ImageUrl)";
 
                 var parameters = new
                 {
-                    Name = model.Name,
-                    Year = model.Year,
-                    SellingPrice = model.selling_price,
-                    KmDriven = model.km_driven,
-                    Fuel = model.Fuel,
-                    SellerType = model.seller_type,
-                    Transmission = model.Transmission,
-                    Owner = model.Owner
+                    model.Name,
+                    model.Year,
+                    model.SellingPrice,
+                    model.KmDriven,
+                    model.Fuel,
+                    model.SellerType,
+                    model.Transmission,
+                    model.Owner,
+                    model.ImageUrl
                 };
 
                 await connection.ExecuteAsync(query, parameters);
+                Console.WriteLine("Car added successfully");
                 return Ok(new { message = "Car added successfully!" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"SERVER ERROR: {ex.Message}"); // Konzol log
+                Console.WriteLine($"Error in AddCar: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
     }
-
-    // CarListing DTO
-    public class CarListing
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Year { get; set; }
-        public decimal selling_price { get; set; }
-        public int km_driven { get; set; }
-        public string Fuel { get; set; }
-        public string seller_type { get; set; }
-        public string Transmission { get; set; }
-        public string Owner { get; set; }
-    }
-
-    // CarListing DTO (For response)
-    public class CarListingDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Year { get; set; }
-        public decimal SellingPrice { get; set; }
-        public int KmDriven { get; set; }
-        public string Fuel { get; set; }
-        public string SellerType { get; set; }
-        public string Transmission { get; set; }
-        public string Owner { get; set; }
-    }
 }
+

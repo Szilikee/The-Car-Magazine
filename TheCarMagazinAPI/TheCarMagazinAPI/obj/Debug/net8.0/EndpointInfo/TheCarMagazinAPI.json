@@ -328,7 +328,7 @@
         }
       }
     },
-    "/api/Marketplace/carlistings": {
+    "/api/forum/carlistings": {
       "get": {
         "tags": [
           "Marketplace"
@@ -340,7 +340,7 @@
         }
       }
     },
-    "/api/Marketplace/addcar": {
+    "/api/forum/addcar": {
       "post": {
         "tags": [
           "Marketplace"
@@ -505,11 +505,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "selling_price": {
+          "sellingPrice": {
             "type": "number",
             "format": "double"
           },
-          "km_driven": {
+          "kmDriven": {
             "type": "integer",
             "format": "int32"
           },
@@ -517,7 +517,7 @@
             "type": "string",
             "nullable": true
           },
-          "seller_type": {
+          "sellerType": {
             "type": "string",
             "nullable": true
           },
@@ -526,6 +526,10 @@
             "nullable": true
           },
           "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
             "type": "string",
             "nullable": true
           }
