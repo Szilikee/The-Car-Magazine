@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'Translations.dart';
 
 class CalendarPage extends StatefulWidget {
   final String selectedLanguage;
@@ -17,46 +18,13 @@ class _CalendarPageState extends State<CalendarPage> {
   List<dynamic> data = [];
   String? selectedYear = "2024";
   bool isLoading = false;
+  bool _isDisposed = false; // Track disposal state
 
-  // Translations
-  final Map<String, Map<String, String>> translations = {
-    'en': {
-      'appBarTitle': 'F1 Teams & Races',
-      'chooseCategory': 'Choose Category',
-      'races': 'Races',
-      'drivers': 'Drivers',
-      'chooseYear': 'Choose Year',
-      'loading': 'Loading...',
-      'noData': 'No accessible data.',
-      'raceName': 'Race Name',
-      'date': 'Date',
-      'location': 'Location',
-      'unknownLocation': 'Unknown',
-      'nationality': 'Nationality',
-      'driverNumber': 'Driver Number',
-      'team': 'Team'
-    },
-    'hu': {
-      'appBarTitle': 'F1 Csapatok & Versenyek',
-      'chooseCategory': 'Válassz kategóriát',
-      'races': 'Versenyek',
-      'drivers': 'Versenyzők',
-      'chooseYear': 'Válassz évet',
-      'loading': 'Betöltés...',
-      'noData': 'Nincs elérhető adat.',
-      'raceName': 'Verseny neve',
-      'date': 'Dátum',
-      'location': 'Hely',
-      'unknownLocation': 'Ismeretlen',
-      'nationality': 'Nemzetiség',
-      'driverNumber': 'Rajtszám',
-      'team': 'Csapat'
-    },
-  };
 
   @override
   void initState() {
     super.initState();
+    selectedOption = "Races"; // Set default option
     fetchData();
   }
 
@@ -70,7 +38,11 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> fetchData() async {
-    setState(() => isLoading = true);
+    if (_isDisposed || !mounted) return;
+
+    setState(() {
+      isLoading = true;
+    });
 
     String url = selectedOption == "Races"
         ? 'http://ergast.com/api/f1/$selectedYear.json'
@@ -80,6 +52,8 @@ class _CalendarPageState extends State<CalendarPage> {
       final response = await http.get(Uri.parse(url)).timeout(
         const Duration(seconds: 5),
       );
+
+      if (_isDisposed || !mounted) return;
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
@@ -104,13 +78,23 @@ class _CalendarPageState extends State<CalendarPage> {
         throw Exception('API ERROR!');
       }
     } catch (e) {
+      if (_isDisposed || !mounted) return;
       print('Error: $e');
       setState(() {
         data = [];
       });
     } finally {
-      setState(() => isLoading = false);
+      if (_isDisposed || !mounted) return;
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true; // Mark as disposed
+    super.dispose();
   }
 
   @override
@@ -135,6 +119,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     value: selectedOption,
                     hint: Text(translations[widget.selectedLanguage]!['chooseCategory']!),
                     onChanged: (String? newValue) {
+                      if (_isDisposed || !mounted) return;
                       setState(() {
                         selectedOption = newValue!;
                       });
@@ -157,6 +142,7 @@ class _CalendarPageState extends State<CalendarPage> {
                       value: selectedYear,
                       hint: Text(translations[widget.selectedLanguage]!['chooseYear']!),
                       onChanged: (String? newValue) {
+                        if (_isDisposed || !mounted) return;
                         setState(() {
                           selectedYear = newValue!;
                         });
@@ -198,7 +184,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             if (selectedOption == "Drivers" &&
                                 (data[index]['headshot_url'] == null ||
                                     data[index]['headshot_url'] == "")) {
-                              return SizedBox.shrink();
+                              return const SizedBox.shrink();
                             }
                             return selectedOption == "Races"
                                 ? raceCard(data[index])
@@ -215,7 +201,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget raceCard(dynamic race) {
     String country = race['Circuit']['Location']['country'] ?? 'Unknown';
     String countryCode = getCountryCode(country);
-    String flagUrl = "https://flagcdn.com/w2560/${countryCode}.png";
+    String flagUrl = "https://flagcdn.com/w2560/$countryCode.png";
     String wikiUrl = race['url'] ?? 'https://en.wikipedia.org/wiki/Formula_One';
 
     if (countryCode == "un") {
@@ -381,7 +367,7 @@ class _CalendarPageState extends State<CalendarPage> {
           Text(
             text,
             style: TextStyle(
-              color: isLink ? Colors.blue.shade700 : Colors.white, // Changed to black for better visibility
+              color: isLink ? Colors.blue.shade700 : Colors.white,
               fontWeight: isLink ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -391,7 +377,7 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Widget _errorImage() {
-    final String imageUrl = "https://cdn-icons-png.flaticon.com/512/74/74472.png";
+    const String imageUrl = "https://cdn-icons-png.flaticon.com/512/74/74472.png";
 
     return Container(
       height: 290,
@@ -399,8 +385,8 @@ class _CalendarPageState extends State<CalendarPage> {
       child: Center(
         child: GestureDetector(
           onTap: () async {
-            if (await canLaunch(imageUrl)) {
-              await launch(imageUrl);
+            if (await canLaunchUrl(Uri.parse(imageUrl))) {
+              await launchUrl(Uri.parse(imageUrl), mode: LaunchMode.externalApplication);
             }
           },
           child: Image.network(imageUrl),

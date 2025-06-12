@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'ListingDetails.dart';
 import 'main.dart';
 import 'ForumPage.dart';
+import 'Models.dart';
+import 'Translations.dart';
+
 
 class HomePage extends StatefulWidget {
   final String selectedLanguage;
@@ -18,21 +21,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _recentTopics = [];
   List<Car> _recentCars = [];
-
-  static const Map<String, Map<String, String>> translations = {
-    'en': {
-      'welcome': 'Welcome to The Car Magazin!',
-      'featuredCars': 'Featured Car Listings',
-      'recentPosts': 'Recent Forum Posts',
-      'viewMore': 'View More',
-    },
-    'hu': {
-      'welcome': 'Üdvözöljük az Autó Magazinban!',
-      'featuredCars': 'Kiemelt Autó Hirdetések',
-      'recentPosts': 'Legutóbbi Fórum Bejegyzések',
-      'viewMore': 'Továbbiak Megtekintése',
-    },
-  };
 
   @override
   void initState() {
@@ -65,156 +53,152 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         setState(() {
-          _recentCars = data.map((carJson) => Car.fromJson(carJson)).take(5).toList(); // Limit to 5 cars
+          _recentCars = data.map((carJson) => Car.fromJson(carJson)).take(6).toList(); // Limit to 5 cars
         });
       }
     } catch (e) {
       print('Error fetching cars: $e');
     }
   }
-
-  Future<String> _getCarImageFromAPI(String carName) async {
-    final apiKey = dotenv.env['PEXELS_API_KEY'];
-    final apiUrl = 'https://api.pexels.com/v1/search?query=${Uri.encodeComponent(carName)}&per_page=1';
-
-    try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {'Authorization': apiKey!},
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['photos'][0]['src']['original'];
-      }
-    } catch (e) {
-      print('Error fetching image: $e');
-    }
-    return 'https://via.placeholder.com/250x120';
-  }
-
 @override
 Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.grey.shade900, // Consistent dark background
-    body: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Center the content horizontally
-        children: [
-          // Welcome Section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(32.0),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blueGrey.shade900, Colors.blueGrey.shade900],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+  return Container(
+    decoration: const BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage("assets/pictures/backgroundimage.png"),
+        fit: BoxFit.cover,
+      ),
+    ),
+    child: Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Welcome Section
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(32.0),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6), // Dark overlay for readability
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    translations[widget.selectedLanguage]!['welcome']!,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Your ultimate destination for car enthusiasts!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.9),
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center the content vertically
-              crossAxisAlignment: CrossAxisAlignment.center, // Center the text horizontally
-              children: [
-                Text(
-                  translations[widget.selectedLanguage]!['welcome']!,
-                  style: const TextStyle(
-                    fontSize: 24, // Smaller font size
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
-                  textAlign: TextAlign.center, // Center the text
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Your ultimate destination for car enthusiasts!',
-                  style: TextStyle(
-                    fontSize: 14, // Smaller font size
-                    color: Colors.white.withOpacity(0.9),
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center, // Center the text
-                        ),
-                      ],
-                    ),
-                  ),
 
             // Featured Car Listings Section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-              child: Text(
-                translations[widget.selectedLanguage]!['featuredCars']!,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 400,
-              child: _recentCars.isEmpty
-                  ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
-                  : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: _recentCars.length,
-                      itemBuilder: (context, index) {
-                        return _buildFeaturedCarCard(_recentCars[index]);
-                      },
+            Container(
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.5), // Add overlay for readability
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: Text(
+                      translations[widget.selectedLanguage]!['featuredCars']!,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
+                  ),
+                  SizedBox(
+                    height: 400,
+                    child: _recentCars.isEmpty
+                        ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            itemCount: _recentCars.length,
+                            itemBuilder: (context, index) {
+                              return _buildFeaturedCarCard(_recentCars[index]);
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
 
             // Recent Forum Posts Section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-              child: Text(
-                translations[widget.selectedLanguage]!['recentPosts']!,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+            Container(
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.5), // Add overlay for readability
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: Text(
+                      translations[widget.selectedLanguage]!['recentPosts']!,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  _recentTopics.isEmpty
+                      ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Column(
+                            children: _recentTopics
+                                .map((topic) => _buildForumPostCard(context, topic))
+                                .toList(),
+                          ),
+                        ),
+                ],
               ),
             ),
-            _recentTopics.isEmpty
-                ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Column(
-                      children: _recentTopics
-                          .map((topic) => _buildForumPostCard(context, topic))
-                          .toList(),
-                    ),
-                  ),
 
             // View More Button
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigate to ForumPage when tapped
+            Container(
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.5), // Add overlay for readability
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                  child: ElevatedButton(
+                    onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ForumPage()),
+                        MaterialPageRoute(builder: (context) => ForumPage(selectedLanguage: "en",)),
                       );
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 5,
+                    ),
                     child: Text(
                       translations[widget.selectedLanguage]!['viewMore']!,
                       style: const TextStyle(
@@ -230,17 +214,35 @@ Widget build(BuildContext context) {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
- Widget _buildFeaturedCarCard(Car car) {
+Widget _buildFeaturedCarCard(Car car) {
   return Container(
     width: 280,
     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+     child: InkWell(
+      onTap: () {
+        // Navigáció az autó részleteihez a ListingDetailsPage-re
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ListingDetailsPage(car: car), // Átadjuk a teljes Car objektumot
+          ),
+        );
+      },
+    
     child: Card(
       elevation: 6,
       color: Colors.grey.shade800,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(
+          color: Colors.white, // Add a subtle border with the new color
+          width: 1,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -298,119 +300,79 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-    ),
+    ),),
   );
 }
 
+Widget _buildForumPostCard(BuildContext context, Map<String, dynamic> topic) {
+  final title = topic['topic'] ?? 'N/A';
+  final description = topic['description'] ?? 'No description';
+  String formattedDate = 'N/A';
 
-  Widget _buildForumPostCard(BuildContext context, Map<String, dynamic> topic) {
-    final title = topic['topic'] ?? 'N/A';
-    final description = topic['description'] ?? 'No description';
-    String formattedDate = 'N/A';
-
-    final createdAt = topic['createdAt'];
-    if (createdAt != null) {
-      try {
-        final parsedDate = DateTime.parse(createdAt.toString());
-        formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(parsedDate);
-      } catch (e) {
-        formattedDate = 'Invalid Date';
-      }
+  final createdAt = topic['createdAt'];
+  if (createdAt != null) {
+    try {
+      final parsedDate = DateTime.parse(createdAt.toString());
+      formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(parsedDate);
+    } catch (e) {
+      formattedDate = 'Invalid Date';
     }
+  }
 
-    return Card(
-      elevation: 4,
-      color: Colors.grey.shade800,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: const Icon(Icons.forum, color: Colors.blueAccent, size: 36),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                formattedDate,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.5),
-                ),
-              ),
-            ],
-          ),
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
-          ); // Adjust to navigate to TopicDetailsPage if available
-        },
+  return Card(
+    elevation: 4,
+    color: Colors.grey.shade800,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    margin: const EdgeInsets.symmetric(vertical: 8),
+    child: ListTile(
+      contentPadding: const EdgeInsets.all(16),
+      leading: const Icon(
+        Icons.forum,
+        color: Colors.blue, // Update icon color to deep orange
+        size: 36,
       ),
-    );
-  }
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.7),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              formattedDate,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      },
+    ),
+  );
 }
-
-
-class Car {
-  final String title;
-  final int year;
-  final int price;
-  final int mileage;
-  final String fuel;
-  final String imagePath;
-  final String location;
-  final String transmission;
-  final String owner;
-
-  Car({
-    required this.title,
-    required this.year,
-    required this.price,
-    required this.mileage,
-    required this.fuel,
-    required this.imagePath,
-    required this.location,
-    required this.transmission,
-    required this.owner,
-  });
-
-  factory Car.fromJson(Map<String, dynamic> json) {
-    print('Parsing JSON: $json');
-    return Car(
-      title: json['name']?.toString() ?? 'Unknown Car',
-      year: json['year']?.toInt() ?? 0,
-      price: (json['sellingPrice']?.toDouble() ?? json['selling_price']?.toDouble() ?? 0).toInt(),
-      mileage: json['kmDriven']?.toInt() ?? json['km_driven']?.toInt() ?? 0,
-      fuel: json['fuel']?.toString() ?? 'Unknown',
-      imagePath: json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '',
-      location: json['sellerType']?.toString() ?? json['seller_type']?.toString() ?? 'Unknown',
-      transmission: json['transmission']?.toString() ?? 'Unknown',
-      owner: json['owner']?.toString().trim() ?? 'Unknown',
-    );
-  }
-
-  @override
-  String toString() => 'Car(title: $title, year: $year, price: $price, imagePath: $imagePath)';
 }

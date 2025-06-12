@@ -23,10 +23,20 @@ class AuthService {
     return prefs.getString(_userIdKey);
   }
 
-Future<bool> login(String username, String password) async {
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+  }
+
+  Future<void> saveUserId(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, userId);
+  }
+
+ Future<bool> login(String username, String password) async {
   try {
     final response = await http.post(
-      Uri.parse('https://localhost:7164/api/User/login'),  // Replace with actual IP
+      Uri.parse('https://localhost:7164/api/User/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'username': username, 'password': password}),
     );
@@ -40,59 +50,74 @@ Future<bool> login(String username, String password) async {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, responseData['token']);
         await prefs.setString(_userIdKey, responseData['userID'].toString());
-        await prefs.setString('username', responseData['username'] ?? 'Unknown'); // Add username
+        await prefs.setString('username', responseData['username'] ?? 'Unknown');
         String language = responseData['language']?.toString() ?? 'en';
         await prefs.setString(_languageKey, language);
         return true;
+      } else {
+        throw Exception('Invalid response data: token or userID missing');
       }
+    } else if (response.statusCode == 401 && response.body.contains('Your account is banned')) {
+      throw Exception('Your account is banned'); // Specific exception for banned users
+    } else {
+      throw Exception(response.body);
     }
-    print('Login Failed: Status Code ${response.statusCode}');
-    return false;
   } catch (error) {
     print('Login Error: $error');
-    return false;
+    throw Exception(error.toString());
   }
 }
 
+  Future<String?> getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
+  }
 
-Future<String?> getUsername() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('username');
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove(_tokenKey),
+      prefs.remove(_userIdKey),
+      prefs.remove(_languageKey),
+      prefs.remove('username'),
+    ]);
+  }
+
+  Future<Map<String, dynamic>> register(String email, String password, String username) async {
+  try {
+    print("Sending Register Request at: ${DateTime.now().toLocal()} (EEST)");
+    final response = await http.post(
+      Uri.parse('https://localhost:7164/api/User/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    print('Register Response: ${response.statusCode} - ${response.body}');
+
+    if (response.statusCode == 201) {
+      final responseData = json.decode(response.body);
+      return {
+        'success': true,
+        'userId': responseData['userId'].toString(), // Changed from 'UserId' to 'userId'
+      };
+    } else {
+      throw Exception(response.body);
+    }
+  } catch (error) {
+    print('Register Error: $error');
+    throw Exception(error.toString());
+  }
 }
-
-Future<void> logout() async {
-  // Get the shared preferences instance
-  final prefs = await SharedPreferences.getInstance();
-
-  // Remove the stored token, user ID, and language
-  await Future.wait([
-    prefs.remove(_tokenKey),    // Remove token
-    prefs.remove(_userIdKey),   // Remove user ID
-    prefs.remove(_languageKey),  // Remove language preference
-  ]);
-}
-
-
-Future<bool> register(String email, String password, String username) async {
-  final response = await http.post(
-    Uri.parse('https://localhost:7164/api/User/register'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode({
-      'username': username,
-      'email': email,
-      'password': password,
-    }),
-  );
-  return response.statusCode == 201;
-}
-
 
   Future<String> getLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_languageKey) ?? 'en';
   }
 }
-
 
 void showSuccess(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -110,7 +135,6 @@ void showSuccess(BuildContext context, String message) {
   );
 }
 
-
 void showFailed(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -126,7 +150,6 @@ void showFailed(BuildContext context, String message) {
     ),
   );
 }
-
 
 void showWarning(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(

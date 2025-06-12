@@ -4,23 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'TopicDetailsPage.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My Car Forum',
-      home: const ForumPage(),
-    );
-  }
-}
-
 class ForumPage extends StatefulWidget {
-  const ForumPage({Key? key}) : super(key: key);
+  final String selectedLanguage;
 
+  const ForumPage({
+    super.key,
+    required this.selectedLanguage,
+  });
+  
   @override
   _ForumPageState createState() => _ForumPageState();
 }
@@ -29,12 +20,26 @@ class _ForumPageState extends State<ForumPage> {
   List<Map<String, dynamic>> _topics = [];
   List<Map<String, dynamic>> _filteredTopics = [];
   String _searchQuery = '';
+  String imagePath = 'assets/pictures/backgroundimage.png'; // Ensure this image exists in your assets
+  String selectedLanguage = 'en'; // Default language
 
   @override
   void initState() {
     super.initState();
     fetchTopics();
   }
+
+  final Map<String, Map<String, String>> translations = {
+    'en': {
+      'forumPageTitle': 'Forum',
+      'searchHint': 'Search topics...',
+       },
+    'hu': {
+      'forumPageTitle': 'Fórum',
+      'searchHint': 'Keresés témák között...',
+    },
+  };
+
 
 Future<void> fetchTopics() async {
   try {
@@ -65,25 +70,114 @@ Future<void> fetchTopics() async {
       }
     });
   }
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forum')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildSearchField(),
-            const SizedBox(height: 10),
-            _buildFeaturedText(),
-            const SizedBox(height: 10),
-            Expanded(child: _buildTopicsList()),
-          ],
-        ),
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              imagePath, // Ensure this image exists in your assets
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.4),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) {
+                // Fallback gradient if image fails to load
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blueGrey.shade900,
+                        Colors.blueGrey.shade700,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Content
+          Column(
+            children: [
+              // Custom Title Bar
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blueGrey.shade900,
+                      Colors.blueGrey.shade700,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        translations[widget.selectedLanguage]?['forumPageTitle'] ?? 'Forum',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Main Content
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade800.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSearchField(),
+                      const SizedBox(height: 10),
+                      _buildFeaturedText(),
+                      const SizedBox(height: 10),
+                      Expanded(child: _buildTopicsList()),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
+
 
   Widget _buildSearchField() {
     return TextField(
@@ -113,46 +207,50 @@ Future<void> fetchTopics() async {
       final description = topic['description'] ?? 'No description';
       String formattedDate = 'N/A';
 
-      final createdAt = topic['createdAt']; // Ensure this matches the field name in the response
+      final createdAt = topic['createdAt'];
       if (createdAt != null) {
         try {
           final parsedDate = DateTime.parse(createdAt.toString());
           formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(parsedDate);
         } catch (e) {
-          print('Date parsing error for topic "$title": $createdAt - $e');
           formattedDate = 'Invalid Date';
         }
-      } else {
-        print('No CreatedAt field for topic: $title');
       }
 
-      return Card(
-        elevation: 2,
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: ListTile(
-          leading: const Icon(Icons.forum, color: Colors.blueAccent),
-          title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(description),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  formattedDate,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+      return MouseRegion(
+        onEnter: (_) => setState(() => _filteredTopics[index]['isHovered'] = true),
+        onExit: (_) => setState(() => _filteredTopics[index]['isHovered'] = false),
+        child: Opacity(
+          opacity: _filteredTopics[index]['isHovered'] == true ? 1.0 : 0.8, // 20% átlátszóság (0.8) alapból, 0% (1.0) hover esetén
+          child: Card(
+            elevation: 2,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              leading: const Icon(Icons.forum, color: Colors.blueAccent),
+              title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(description),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      formattedDate,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
-            ],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TopicDetailsPage(topic: topic),
+                  ),
+                );
+              },
+            ),
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TopicDetailsPage(topic: topic),
-              ),
-            );
-          },
         ),
       );
     },
