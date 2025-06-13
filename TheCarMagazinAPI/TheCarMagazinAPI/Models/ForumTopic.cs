@@ -13,7 +13,16 @@ namespace TheCarMagazinAPI.Models
     }
 
     public class Topic { public long Id { get; set; } public string TopicName { get; set; } /* ... */ }
-    public class Subtopic { public long Id { get; set; } public long TopicId { get; set; } public string Title { get; set; } /* ... */ }
+    public class Subtopic
+    {
+        public long Id { get; set; }
+        public long TopicId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public long? UserId { get; set; }
+        public string? Username { get; set; }
+    }
     public class Post
     {
         public long Id { get; set; }
