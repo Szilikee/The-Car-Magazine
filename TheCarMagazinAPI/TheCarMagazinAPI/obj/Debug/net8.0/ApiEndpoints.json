@@ -1,5 +1,314 @@
 [
   {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "HealthCheck",
+    "RelativePath": "api/Admin/health",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "DeleteMarketplaceListing",
+    "RelativePath": "api/Admin/marketplace/{carId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "carId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "ReportContent",
+    "RelativePath": "api/Admin/report",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "reportDto",
+        "Type": "TheCarMagazinAPI.Controllers.ReportContentDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "GetReportedContent",
+    "RelativePath": "api/Admin/reported-content",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "perPage",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "DeleteReportedContent",
+    "RelativePath": "api/Admin/reported/{contentId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "contentId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "contentType",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "AcceptReport",
+    "RelativePath": "api/Admin/reported/{contentId}/accept",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "contentId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "contentType",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "DeleteSupportTicket",
+    "RelativePath": "api/Admin/support-ticket/{ticketId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ticketId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "ResolveSupportTicket",
+    "RelativePath": "api/Admin/support-ticket/{ticketId}/resolve-email",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ticketId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "deleteDto",
+        "Type": "TheCarMagazinAPI.Controllers.DeleteTicketDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "SendResponseEmail",
+    "RelativePath": "api/Admin/support-ticket/{ticketId}/respond",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ticketId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "respondDto",
+        "Type": "TheCarMagazinAPI.Controllers.RespondTicketDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "UpdateTicketStatus",
+    "RelativePath": "api/Admin/support-ticket/{ticketId}/status",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ticketId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "statusDto",
+        "Type": "TheCarMagazinAPI.Controllers.UpdateTicketStatusDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "GetSupportTickets",
+    "RelativePath": "api/Admin/support-tickets",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "GetUser",
+    "RelativePath": "api/Admin/user",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Nullable\u00601[[System.Int64, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "username",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "GetUserById",
+    "RelativePath": "api/Admin/user/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "UpdateUser",
+    "RelativePath": "api/Admin/user/{userId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "updateData",
+        "Type": "TheCarMagazinAPI.Controllers.AdminUpdateUserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.AdminController",
+    "Method": "BanUser",
+    "RelativePath": "api/Admin/user/{userId}/ban",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.CarDamageController",
+    "Method": "Predict",
+    "RelativePath": "api/cardamage/predict",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ContentType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ContentDisposition",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Headers",
+        "Type": "Microsoft.AspNetCore.Http.IHeaderDictionary",
+        "IsRequired": false
+      },
+      {
+        "Name": "Length",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "FileName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "TheCarMagazinAPI.Controllers.CarController",
     "Method": "GetCarBrands",
     "RelativePath": "api/cars/brands",
@@ -120,29 +429,72 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
-    "Method": "AddCar",
-    "RelativePath": "api/forum/addcar",
-    "HttpMethod": "POST",
+    "ContainingType": "ForumController",
+    "Method": "GetPost",
+    "RelativePath": "api/forum/posts/{postId}",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "model",
-        "Type": "TheCarMagazinAPI.Models.CarListing",
+        "Name": "postId",
+        "Type": "System.Int64",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
-    "Method": "GetCarListings",
-    "RelativePath": "api/forum/carlistings",
+    "ContainingType": "ForumController",
+    "Method": "VotePost",
+    "RelativePath": "api/forum/posts/{postId}/vote",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "postId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "voteDto",
+        "Type": "VoteDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ForumController",
+    "Method": "RemoveVote",
+    "RelativePath": "api/forum/posts/{postId}/vote",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "postId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ForumController",
+    "Method": "GetSubtopic",
+    "RelativePath": "api/forum/subtopics/{subtopicId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "subtopicId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -155,6 +507,22 @@
     "Parameters": [
       {
         "Name": "subtopicId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ForumController",
+    "Method": "GetCreatedSubtopics",
+    "RelativePath": "api/forum/subtopics/created/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
         "Type": "System.Int64",
         "IsRequired": true
       }
@@ -246,6 +614,194 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MagazineController",
+    "Method": "GetArticles",
+    "RelativePath": "api/magazine/articles",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MagazineController",
+    "Method": "CreateArticle",
+    "RelativePath": "api/magazine/articles",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "articleDto",
+        "Type": "CreateArticleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "AddCar",
+    "RelativePath": "api/marketplace/addcar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TheCarMagazinAPI.Models.CarListing",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "GetCarListings",
+    "RelativePath": "api/marketplace/carlistings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "UpdateCarListing",
+    "RelativePath": "api/marketplace/carlistings/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int64",
+        "IsRequired": true
+      },
+      {
+        "Name": "model",
+        "Type": "TheCarMagazinAPI.Models.CarListing",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "DeleteCarListing",
+    "RelativePath": "api/marketplace/carlistings/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.MarketplaceController",
+    "Method": "GetMyCarListings",
+    "RelativePath": "api/marketplace/my-listings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.PredictionController",
+    "Method": "Predict",
+    "RelativePath": "api/prediction/predict",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ContentType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ContentDisposition",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Headers",
+        "Type": "Microsoft.AspNetCore.Http.IHeaderDictionary",
+        "IsRequired": false
+      },
+      {
+        "Name": "Length",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "FileName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "InitiateEmailChange",
+    "RelativePath": "api/User/email/change/request",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "EmailChangeRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "VerifyAndChangeEmail",
+    "RelativePath": "api/User/email/change/verify",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "verifyDto",
+        "Type": "EmailChangeVerifyDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "GoogleSignIn",
+    "RelativePath": "api/User/google-signin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "GoogleSignInRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
     "Method": "Login",
     "RelativePath": "api/User/login",
@@ -256,6 +812,80 @@
       {
         "Name": "userDto",
         "Type": "TheCarMagazinAPI.Models.UserLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "GetCurrentUser",
+    "RelativePath": "api/User/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "InitiatePasswordChange",
+    "RelativePath": "api/User/password/change/request",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "TheCarMagazinAPI.Models.PasswordChangeRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "VerifyAndChangePassword",
+    "RelativePath": "api/User/password/change/verify",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "verifyDto",
+        "Type": "TheCarMagazinAPI.Models.PasswordChangeVerifyDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "CreatePost",
+    "RelativePath": "api/User/posts",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "postDto",
+        "Type": "CreatePostDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "DeletePost",
+    "RelativePath": "api/User/posts/{postId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "postId",
+        "Type": "System.Int64",
         "IsRequired": true
       }
     ],
@@ -279,8 +909,82 @@
   },
   {
     "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "RegisterArgon2",
+    "RelativePath": "api/User/register-argon2",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userDto",
+        "Type": "TheCarMagazinAPI.Models.UserRegistrationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "CreateSupportTicket",
+    "RelativePath": "api/User/support/message",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "CreateSupportTicketDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "SyncPostCount",
+    "RelativePath": "api/User/sync-post-count",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "SubmitSupportTicket",
+    "RelativePath": "api/User/ticket",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ticketDto",
+        "Type": "SubmitTicketDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
     "Method": "GetUserDetails",
     "RelativePath": "api/User/userdetails/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "GetTopPosts",
+    "RelativePath": "api/User/userdetails/{userId}/top-posts",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -304,6 +1008,22 @@
       {
         "Name": "userDetailsDto",
         "Type": "TheCarMagazinAPI.Models.UserDetailsDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheCarMagazinAPI.Controllers.UserController",
+    "Method": "VerifyCode",
+    "RelativePath": "api/User/verify",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "verifyDto",
+        "Type": "TheCarMagazinAPI.Models.VerifyCodeDto",
         "IsRequired": true
       }
     ],

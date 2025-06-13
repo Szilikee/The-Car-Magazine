@@ -2,7 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'CreateListingPage.dart';
+import 'ListingDetails.dart';
 import 'auth_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'Models.dart';
+
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -22,7 +26,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
   // Filter variables
   String searchKeyword = '';
-  bool showFilters = false; // Új változó a szűrők megjelenítéséhez
+  bool showFilters = false;
   bool usePriceFilter = false;
   TextEditingController minPriceController = TextEditingController();
   TextEditingController maxPriceController = TextEditingController();
@@ -39,12 +43,12 @@ class _MarketplacePageState extends State<MarketplacePage> {
   bool useTransmissionFilter = false;
   String? selectedTransmission;
   bool useOwnerFilter = false;
-  TextEditingController ownerController = TextEditingController();
+  TextEditingController contactController = TextEditingController();
 
-  // Lista az ismert értékekhez (API adatok alapján)
-  final List<String> fuelOptions = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'asd'];
-  final List<String> sellerTypeOptions = ['Individual', 'Dealer', 'asd', 'En'];
-  final List<String> transmissionOptions = ['Manual', 'Automatic', 'asd'];
+  // Filter options
+  final List<String> fuelOptions = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'LPG'];
+  final List<String> sellerTypeOptions = ['Individual', 'Dealer'];
+  final List<String> transmissionOptions = ['Manual', 'Automatic'];
 
   @override
   void initState() {
@@ -61,7 +65,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
     maxMileageController.dispose();
     minYearController.dispose();
     maxYearController.dispose();
-    ownerController.dispose();
+    contactController.dispose();
     super.dispose();
   }
 
@@ -79,11 +83,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 
   Future<List<Car>> getCars() async {
-    const String apiUrl = 'https://localhost:7164/api/forum/carlistings';
+    const String apiUrl = 'https://localhost:7164/api/marketplace/carlistings';
     final String? token = await AuthService().getToken();
     try {
-      print('Fetching cars from: $apiUrl');
-      print('Token: $token');
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -91,17 +93,14 @@ class _MarketplacePageState extends State<MarketplacePage> {
           if (token != null) 'Authorization': 'Bearer $token',
         },
       );
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         List<Car> cars = data.map((carJson) {
           if (carJson['imageUrl'] == null) print('Warning: imageUrl is null for car: ${carJson['name']}');
-          if (carJson['sellingPrice'] == 0) print('Warning: sellingPrice is 0 for car: ${carJson['name']}');
+          if (carJson['sellingPrice'] == null || carJson['sellingPrice'] == 0) print('Warning: sellingPrice is 0 for car: ${carJson['name']}');
           if (carJson['sellerType'] == null || carJson['sellerType'] == '') print('Warning: sellerType is empty for car: ${carJson['name']}');
           return Car.fromJson(carJson);
         }).toList();
-        print('Parsed cars: $cars');
         setState(() {
           allCars = cars;
           filteredCars = cars;
@@ -161,7 +160,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
         bool matchesSellerType = true;
         if (useSellerTypeFilter && selectedSellerType != null) {
-          matchesSellerType = car.location.toLowerCase() == selectedSellerType!.toLowerCase();
+          matchesSellerType = car.sellerType.toLowerCase() == selectedSellerType!.toLowerCase();
         }
 
         bool matchesTransmission = true;
@@ -170,8 +169,8 @@ class _MarketplacePageState extends State<MarketplacePage> {
         }
 
         bool matchesOwner = true;
-        if (useOwnerFilter && ownerController.text.isNotEmpty) {
-          matchesOwner = car.owner.toLowerCase().contains(ownerController.text.toLowerCase());
+        if (useOwnerFilter && contactController.text.isNotEmpty) {
+          matchesOwner = car.contact.toLowerCase().contains(contactController.text.toLowerCase());
         }
 
         return matchesSearch &&
@@ -189,272 +188,484 @@ class _MarketplacePageState extends State<MarketplacePage> {
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Car Marketplace'),
-    ),
-    body: Column(
-      children: [
-        // Gombok vízszintes sorban
-// Gombok vízszintes sorban, felcserélve
-if (isLoggedIn || true)
-  Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              showFilters = !showFilters;
-            });
-          },
-          child: Text(showFilters ? 'Hide Filters' : 'Show Filters'),
-        ),
-        if (isLoggedIn)
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CreateCarListingsPage()),
-              ).then((_) => _loadCars());
-            },
-            child: const Text('Add New Car Listing'),
-          ),
-      ],
-    ),
-  ),
+  @override
+  Widget build(BuildContext context) {
+    final String imagePath = 'assets/pictures/backgroundimage.png';
 
-
-        // Szűrők
-        if (showFilters)
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            constraints: const BoxConstraints(maxHeight: 400),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Keresőmező (mindig látható, külön)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      onChanged: (text) {
-                        searchKeyword = text;
-                        _filterCars();
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search by name or year...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  // Ár szűrő
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: usePriceFilter,
-                              onChanged: (value) {
-                                setState(() {
-                                  usePriceFilter = value ?? false;
-                                });
-                                _filterCars();
-                              },
-                            ),
-                            const Text('Price (€)', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: minPriceController,
-                                enabled: usePriceFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Min',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: maxPriceController,
-                                enabled: usePriceFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Max',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                          ],
-                        ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.5),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blueGrey.shade900,
+                        Colors.blueGrey.shade700,
                       ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
                   ),
-                  // Futásteljesítmény szűrő
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: useMileageFilter,
-                              onChanged: (value) {
-                                setState(() {
-                                  useMileageFilter = value ?? false;
-                                });
-                                _filterCars();
-                              },
-                            ),
-                            const Text('Mileage (km)', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: minMileageController,
-                                enabled: useMileageFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Min',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: maxMileageController,
-                                enabled: useMileageFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Max',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Év szűrő
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: useYearFilter,
-                              onChanged: (value) {
-                                setState(() {
-                                  useYearFilter = value ?? false;
-                                });
-                                _filterCars();
-                              },
-                            ),
-                            const Text('Year', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: minYearController,
-                                enabled: useYearFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Min',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: maxYearController,
-                                enabled: useYearFilter,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Max',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) => _filterCars(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // További szűrők ugyanígy kialakítva
-                ],
-              ),
+                );
+              },
             ),
           ),
-        // Autók listája
-        Expanded(
-          child: FutureBuilder<List<Car>>(
-            future: _carsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
-                return Center(child: Text('No cars available: $statusMessage'));
-              } else {
-                return PaginatedCarList(
-                  cars: filteredCars,
-                  currentPage: currentPage,
-                  itemsPerPage: itemsPerPage,
-                  onNextPage: () {
-                    setState(() {
-                      if ((currentPage + 1) * itemsPerPage < filteredCars.length) {
-                        currentPage++;
-                      }
-                    });
-                  },
-                  onPreviousPage: () {
-                    setState(() {
-                      if (currentPage > 0) {
-                        currentPage--;
-                      }
-                    });
-                  },
-                );
-              }
-            },
+          // Content
+          Column(
+            children: [
+              // Custom Title Bar
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blueGrey.shade900,
+                      Colors.blueGrey.shade700,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Car Marketplace',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Main Content
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade800.withOpacity(0.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Buttons Row
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  showFilters = !showFilters;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.tealAccent,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Text(showFilters ? 'Hide Filters' : 'Show Filters'),
+                            ),
+                            if (isLoggedIn)
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const CreateCarListingsPage(selectedLanguage: "en",)),
+                                  ).then((_) => _loadCars());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.tealAccent,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: const Text('Add New Car Listing'),
+                              ),
+                          ],
+                        ),
+                      ),
+                      // Filters
+                      if (showFilters)
+                        Container(
+                          padding: const EdgeInsets.all(10.0),
+                          constraints: const BoxConstraints(maxHeight: 400),
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey.shade900.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                // Search Field
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    onChanged: (text) {
+                                      searchKeyword = text;
+                                      _filterCars();
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: 'Search by name or year...',
+                                      hintStyle: TextStyle(color: Colors.grey[400]),
+                                      prefixIcon: const Icon(Icons.search, color: Colors.tealAccent),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.blueGrey.shade700,
+                                    ),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                // Price Filter
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Checkbox(
+                                            value: usePriceFilter,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                usePriceFilter = value ?? false;
+                                              });
+                                              _filterCars();
+                                            },
+                                            activeColor: Colors.tealAccent,
+                                            checkColor: Colors.black,
+                                          ),
+                                          const Text(
+                                            'Price (€)',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: minPriceController,
+                                              enabled: usePriceFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Min',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: maxPriceController,
+                                              enabled: usePriceFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Max',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Mileage Filter
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Checkbox(
+                                            value: useMileageFilter,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                useMileageFilter = value ?? false;
+                                              });
+                                              _filterCars();
+                                            },
+                                            activeColor: Colors.tealAccent,
+                                            checkColor: Colors.black,
+                                          ),
+                                          const Text(
+                                            'Mileage (km)',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: minMileageController,
+                                              enabled: useMileageFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Min',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: maxMileageController,
+                                              enabled: useMileageFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Max',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Year Filter
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Checkbox(
+                                            value: useYearFilter,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                useYearFilter = value ?? false;
+                                              });
+                                              _filterCars();
+                                            },
+                                            activeColor: Colors.tealAccent,
+                                            checkColor: Colors.black,
+                                          ),
+                                          const Text(
+                                            'Year',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: minYearController,
+                                              enabled: useYearFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Min',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: maxYearController,
+                                              enabled: useYearFilter,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: 'Max',
+                                                labelStyle: TextStyle(color: Colors.grey[400]),
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.blueGrey.shade700,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              style: const TextStyle(color: Colors.white),
+                                              onChanged: (value) => _filterCars(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      // Cars List
+                      Expanded(
+                        child: FutureBuilder<List<Car>>(
+                          future: _carsFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator(color: Colors.tealAccent));
+                            } else if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No cars available: $statusMessage',
+                                  style: TextStyle(color: Colors.grey[400]),
+                                ),
+                              );
+                            } else {
+                              return PaginatedCarList(
+                                cars: filteredCars,
+                                currentPage: currentPage,
+                                itemsPerPage: itemsPerPage,
+                                onNextPage: () {
+                                  setState(() {
+                                    if ((currentPage + 1) * itemsPerPage < filteredCars.length) {
+                                      currentPage++;
+                                    }
+                                  });
+                                },
+                                onPreviousPage: () {
+                                  setState(() {
+                                    if (currentPage > 0) {
+                                      currentPage--;
+                                    }
+                                  });
+                                },
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
-}
-// PaginatedCarList és Car osztály változatlan
+
 class PaginatedCarList extends StatelessWidget {
   final List<Car> cars;
   final int currentPage;
@@ -495,65 +706,73 @@ class PaginatedCarList extends StatelessWidget {
                   ? car.imagePath
                   : 'https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg';
 
-              print('Loading image for ${car.title}: $imageUrl');
 
-              return Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(child: CircularProgressIndicator());
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            print('Image load error for ${car.title}: $error');
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Center(child: Text('Image not available')),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${car.title} (${car.year})',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${car.fuel} • ${car.mileage} km • ${car.transmission}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          Text(
-                            '${car.price} €',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              return // In PaginatedCarList's build method, replace the Card widget with this:
+Card(
+  elevation: 5,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ListingDetailsPage(car: car),
+        ),
+      );
+    },
+    borderRadius: BorderRadius.circular(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+            errorWidget: (context, url, error) {
+              print('Image load error for ${car.title}: $error');
+              return Container(
+                color: Colors.grey[300],
+                child: const Center(child: Text('Image not available')),
               );
+            },
+          ),
+        ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${car.title} (${car.year})',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                '${car.fuel} • ${car.mileage} km • ${car.transmission}',
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              Text(
+                '${car.price} €',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+);
             },
           ),
         ),
@@ -579,46 +798,4 @@ class PaginatedCarList extends StatelessWidget {
       ],
     );
   }
-}
-
-class Car {
-  final String title;
-  final int year;
-  final int price;
-  final int mileage;
-  final String fuel;
-  final String imagePath;
-  final String location;
-  final String transmission;
-  final String owner;
-
-  Car({
-    required this.title,
-    required this.year,
-    required this.price,
-    required this.mileage,
-    required this.fuel,
-    required this.imagePath,
-    required this.location,
-    required this.transmission,
-    required this.owner,
-  });
-
-  factory Car.fromJson(Map<String, dynamic> json) {
-    print('Parsing JSON: $json');
-    return Car(
-      title: json['name']?.toString() ?? 'Unknown Car',
-      year: json['year']?.toInt() ?? 0,
-      price: (json['sellingPrice']?.toDouble() ?? json['selling_price']?.toDouble() ?? 0).toInt(),
-      mileage: json['kmDriven']?.toInt() ?? json['km_driven']?.toInt() ?? 0,
-      fuel: json['fuel']?.toString() ?? 'Unknown',
-      imagePath: json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '',
-      location: json['sellerType']?.toString() ?? json['seller_type']?.toString() ?? 'Unknown',
-      transmission: json['transmission']?.toString() ?? 'Unknown',
-      owner: json['owner']?.toString().trim() ?? 'Unknown',
-    );
-  }
-
-  @override
-  String toString() => 'Car(title: $title, year: $year, price: $price, imagePath: $imagePath)';
 }

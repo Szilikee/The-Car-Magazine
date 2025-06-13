@@ -1,0 +1,10 @@
+TheCarMagazinAPI/TheCarMagazinAPI/appsettings.json
+TheCarMagazinAPI/TheCarMagazinAPI/bin/Debug/net8.0/appsettings.json
+TheCarMagazinAPI/TheCarMagazinAPI/appsettings.json
+TheCarMagazinAPI/TheCarMagazinAPI/maxpoolingModel.keras
+TheCarMagazinAPI/TheCarMagazinAPI/Models/AI/carbrand.onnx
+TheCarMagazinAPI/TheCarMagazinAPI/Models/AI/model_simplified.onnx
+TheCarMagazinAPI/TheCarMagazinAPI/bin/Debug/net8.0/runtimes/linux-x64/native/libtensorflow.so
+TheCarMagazinAPI/TheCarMagazinAPI/bin/Debug/net8.0/runtimes/win-x64/native/tensorflow.dll
+test1/assets/.env
+Database.sql

@@ -54,9 +54,6 @@ class _CreateSubtopicPageState extends State<CreateSubtopicPage> {
     final description = _descriptionController.text.trim();
     final token = await _authService.getToken();
 
-    print('Creating subtopic with title: $title, description: $description, topicId: ${widget.topicId}');
-    print('Title length: ${title.length}, Description length: ${description.length}');
-    print('Token: $token');
 
     if (title.isEmpty || description.isEmpty) {
       showWarning(context, 'Please fill in all fields.');
@@ -117,68 +114,146 @@ class _CreateSubtopicPageState extends State<CreateSubtopicPage> {
 
 @override
 Widget build(BuildContext context) {
+  final String imagePath = 'assets/pictures/backgroundimage.png'; // Hardcoded background image
+
   return Scaffold(
-    appBar: AppBar(
-      title: Text(
-        _topicTitle != null ? 'Create Subtopic for $_topicTitle' : 'Create New Subtopic',
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-      backgroundColor: Colors.black87,
-      elevation: 4,
-    ),
-    body: Center(
-      child: Container(
-        width: 350, // Kocka ablak szélessége
-        padding: const EdgeInsets.all(20.0),
-        margin: const EdgeInsets.symmetric(horizontal: 20.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[900], // Sötét háttér a modern megjelenéshez
-          borderRadius: BorderRadius.circular(15), // Lekerekített sarkok
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4), // Árnyék a mélységérzethez
-            ),
-          ],
+    body: Stack(
+      children: [
+        // Background Image
+        Positioned.fill(
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            color: Colors.black.withOpacity(0.5), // Opacity set to 0.5
+            colorBlendMode: BlendMode.darken,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback gradient if image fails to load
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blueGrey.shade900,
+                      Colors.blueGrey.shade700,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // A konténer csak akkora legyen, amekkora szükséges
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // Content
+        Column(
           children: [
-            // Cím mező
-            _buildTextField(_titleController, 'Subtopic Title'),
-            const SizedBox(height: 16),
-            // Leírás mező
-            _buildTextField(_descriptionController, 'Description', maxLines: 3),
-            const SizedBox(height: 20),
-            // Gomb vagy betöltésjelző
-            Center(
-              child: _isLoading
-                  ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                    )
-                  : ElevatedButton(
-                      onPressed: _createSubtopic,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 5,
+            // Custom Title Bar with Back Button
+            Container(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 16,
+                left: 16,
+                right: 16,
+                bottom: 16,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blueGrey.shade900,
+                    Colors.blueGrey.shade700,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
+                    tooltip: 'Back',
+                  ),
+                  Expanded(
+                    child: Text(
+                      _topicTitle != null ? 'Create Subtopic for $_topicTitle' : 'Create New Subtopic',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      child: const Text(
-                        'Create Subtopic',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  const SizedBox(width: 48), // Spacer to balance back button
+                ],
+              ),
+            ),
+            // Main Content
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey.shade800.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title Field
+                      _buildTextField(_titleController, 'Subtopic Title'),
+                      const SizedBox(height: 16),
+                      // Description Field
+                      _buildTextField(_descriptionController, 'Description', maxLines: 3),
+                      const SizedBox(height: 20),
+                      // Button or Loading Indicator
+                      Center(
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.tealAccent),
+                              )
+                            : ElevatedButton(
+                                onPressed: _createSubtopic,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.tealAccent,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  elevation: 5,
+                                ),
+                                child: const Text(
+                                  'Create Subtopic',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
-      ),
+      ],
     ),
-    backgroundColor: Colors.grey[850], // Sötét háttér a kontraszt érdekében
   );
 }
 
@@ -186,24 +261,25 @@ Widget _buildTextField(TextEditingController controller, String label, {int maxL
   return TextFormField(
     controller: controller,
     maxLines: maxLines,
-    style: const TextStyle(color: Colors.white), // Fehér szöveg a sötét háttérhez
+    style: const TextStyle(color: Colors.white),
     decoration: InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Colors.white70, fontSize: 14),
+      labelStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
       enabledBorder: OutlineInputBorder(
         borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
         borderRadius: BorderRadius.circular(10),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.lightBlueAccent, width: 2),
+        borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
         borderRadius: BorderRadius.circular(10),
       ),
       filled: true,
-      fillColor: Colors.black54, // Enyhén világosabb sötét háttér a mezőknek
+      fillColor: Colors.blueGrey.shade700,
       contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     ),
   );
 }
+
 
 @override
 void dispose() {
@@ -211,21 +287,4 @@ void dispose() {
   _descriptionController.dispose();
   super.dispose();
 }
-}
-void showFailed(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message), backgroundColor: Colors.red),
-  );
-}
-
-void showWarning(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message), backgroundColor: Colors.orange),
-  );
-}
-
-void showSuccess(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message), backgroundColor: Colors.green),
-  );
 }

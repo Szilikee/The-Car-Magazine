@@ -4,13 +4,10 @@
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
-
     The path provided below has to start and end with a slash "/" in order for
     it to work correctly.
-
     For more details:
     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
@@ -29,10 +26,26 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>test1</title>
+  <!-- Google Sign-In JavaScript SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://www.gstatic.com/external_hosted/flutter_inappwebview.js"></script>
+  <title>The Car Magazine</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- Hely a Google Sign-In gombnak (opcionális, ha egyéni gombot használsz) -->
+  <div id="g_id_onload" data-client_id="1002849795684-cmhmaht11g5qib9ik08atb02ut36bdkj.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Egyéni JavaScript callback (opcionális, ha a gombot az index.html-ben kezeled) -->
+  <script>
+    function handleCredentialResponse(response) {
+      console.log("Encoded JWT ID token: " + response.credential);
+      // Itt továbbíthatod a tokent a Flutter kódnak (pl. egy eseményen keresztül)
+    }
+  </script>
 </body>
 </html>

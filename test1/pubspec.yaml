@@ -11,11 +11,28 @@ dependencies:
     sdk: flutter
   fl_chart: ^1.0.0
   http: ^1.4.0
-  intl: ^0.19.0
-  cached_network_image: ^3.4.1  # Hozzáadva hálózati képekhez
-  shared_preferences: ^2.5.3   # Ha használod a nyelvi beállítások tárolására
-  flutter_dotenv: ^5.2.1       # Ha környezeti változókat használsz (pl. API URL)
+  intl: 0.19.0
+  cached_network_image: ^3.4.1 
+  shared_preferences: ^2.5.3  
+  flutter_dotenv: ^5.2.1      
   url_launcher: ^6.3.1
+  image_picker: ^1.1.2
+  url_launcher_plus: ^1.2.0
+  material_design_icons_flutter: ^7.0.7296
+  file_picker: ^10.1.9
+  image: ^4.5.4
+  path_provider: ^2.1.5
+  tflite: ^1.1.2
+  universal_io: ^2.2.2
+  http_parser: ^4.1.2
+  google_fonts: ^6.2.1
+  photo_view: ^0.14.0
+  video_player: ^2.9.1  # Add this line
+  google_sign_in: ^6.2.1
+  google_sign_in_web: ^0.12.0
+  google_sign_in_platform_interface: ^2.5.0
+  googleapis_auth: ^2.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -25,35 +42,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+      - assets/pictures/backgroundimage.png
       - assets/pictures/intro.jpg
-      - assets/pictures/card1.jpg
-      - assets/pictures/card2.jpg
-      - assets/pictures/card3.jpg
-      - assets/pictures/card4.jpg
-      - assets/pictures/car1.jpg
-      - assets/pictures/car2.jpg
-      - assets/pictures/car3.jpg
-      - assets/pictures/car4.jpg
-      - assets/pictures/electric_cars.jpg
-      - assets/pictures/suvs.jpg
-      - assets/pictures/car_of_the_year.jpg
-      - assets/pictures/honda_prelude.jpg      # Feature article image
-      - assets/pictures/mclaren_hypercar.jpg   # Article grid image 1
-      - assets/pictures/bmw_z4.jpg             # Article grid image 2
-      - assets/pictures/mustang_f100.jpg       # Article grid image 3
-      - assets/pictures/hummer_rivian.jpg      # Article grid image 4
-      - assets/pictures/toyota_suv.jpg
-      - assets/pictures/ferrari_suv.jpg
-      - assets/pictures/porsche_gt3rs.jpg      # New article 1
-      - assets/pictures/tesla_cybertruck.jpg   # New article 2
-      - assets/pictures/audi_a9.jpg            # New article 3
-      - assets/pictures/bronco_raptor.jpg      # New article 4
-      - assets/pictures/lamborghini_revuelto.jpg  # New article 5
-      - assets/pictures/jeep_grand_cherokee.jpg   # New article 6
-      - assets/pictures/logo.png
-      - assets/pictures/ferrari_future.jpg
-      - assets/pictures/bmw_i8.jpg
-      - assets/pictures/tesla_roadster.jpg
-      - assets/pictures/lamborghini_aventador.jpg
-      - assets/pictures/default_car.jpg
-      - assets/logos/  # Include the logos directory for all files inside
+      - assets/logos/
+      - assets/videos/logointro.mp4  # Add this line
+      - assets/videos/introvid.mp4  # Add this line
+      - assets/pictures/googlefavicon.png
