@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using MySql.Data.MySqlClient;
-using TheCarMagazinAPI.Models;
-using Microsoft.Extensions.Configuration;
+using TheCarMagazinAPI.DTOs;
 
 namespace TheCarMagazinAPI.Services
 {
@@ -66,6 +65,26 @@ namespace TheCarMagazinAPI.Services
                 new { userId, bio, status });
 
             return rowsAffected;
+        }
+
+        private async Task UpdateUserRank(long userId, MySqlConnection connection)
+        {
+            var postCount = await connection.QuerySingleAsync<int>(
+                "SELECT post_count FROM users WHERE id = @UserId",
+                new { UserId = userId });
+
+            string newRank = postCount switch
+            {
+                >= 50 => "Pit Crew Chief",
+                >= 25 => "Track Day Enthusiast",
+                >= 10 => "Highway Cruiser",
+                >= 5 => "City Driver",
+                _ => "Learner Driver"
+            };
+
+            await connection.ExecuteAsync(
+                "UPDATE users SET user_rank = @UserRank WHERE id = @UserId",
+                new { UserRank = newRank, UserId = userId });
         }
     }
 }

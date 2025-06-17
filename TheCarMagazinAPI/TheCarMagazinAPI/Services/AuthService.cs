@@ -3,8 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using TheCarMagazinAPI.Models;
+using TheCarMagazinAPI.DTOs;
 
 namespace TheCarMagazinAPI.Services
 {

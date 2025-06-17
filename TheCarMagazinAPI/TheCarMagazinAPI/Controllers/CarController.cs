@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using Dapper;
+using TheCarMagazinAPI.DTOs;
+
 
 namespace TheCarMagazinAPI.Controllers
 {
@@ -138,23 +140,5 @@ namespace TheCarMagazinAPI.Controllers
             }
         }
 
-        public class CarDetails
-        {
-            public string Genmodel_ID { get; set; }
-            public string Maker { get; set; }
-            public string Genmodel { get; set; }
-            public string Trim { get; set; }
-            public int Year { get; set; }
-            public decimal Price { get; set; }
-            public int Gas_emission { get; set; }
-            public string Fuel_type { get; set; }
-            public int Engine_size { get; set; }
-        }
-
-        public class CarImage
-        {
-            public string Image_ID { get; set; }
-            public string Image_name { get; set; }
-        }
     }
 }

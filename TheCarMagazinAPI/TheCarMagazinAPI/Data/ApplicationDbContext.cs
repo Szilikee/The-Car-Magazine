@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TheCarMagazinAPI.Models;
+using TheCarMagazinAPI.DTOs;
 
 namespace TheCarMagazinAPI.Data
 {

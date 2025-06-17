@@ -1,0 +1,59 @@
+name: my_car_forum
+description: A simple car forum web application.
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  fl_chart: ^1.0.0
+  http: ^1.4.0
+  intl: 0.19.0
+  cached_network_image: ^3.4.1 
+  shared_preferences: ^2.5.3  
+  flutter_dotenv: ^5.2.1      
+  url_launcher: ^6.3.1
+  image_picker: ^1.1.2
+  url_launcher_plus: ^1.2.0
+  material_design_icons_flutter: ^7.0.7296
+  file_picker: ^10.1.9
+  image: ^4.5.4
+  path_provider: ^2.1.5
+  tflite: ^1.1.2
+  universal_io: ^2.2.2
+  http_parser: ^4.1.2
+  google_fonts: ^6.2.1
+  photo_view: ^0.14.0
+  video_player: ^2.9.1
+  flutter_web_auth_2: ^4.0.0
+  cupertino_icons: ^1.0.0
+  logger: ^2.4.0
+  oauth2: ^2.0.2
+  webview_flutter: ^4.9.0
+  js: ^0.7.0
+  carousel_slider: ^5.1.1
+
+fonts:
+  - family: Roboto
+    -fonts:
+      - asset: fonts/Roboto-Regular.ttf
+      - asset: assets/fonts/LuxuriousRoman-Regular.ttf
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+      - assets/pictures/backgroundimage.png
+      - assets/pictures/intro.jpg
+      - assets/logos/
+      - assets/pictures/googlefavicon.png
+      - assets/dtcmapping.json
