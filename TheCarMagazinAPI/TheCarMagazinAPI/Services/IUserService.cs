@@ -1,4 +1,4 @@
-﻿using TheCarMagazinAPI.Models;
+﻿using TheCarMagazinAPI.DTOs;
 
 namespace TheCarMagazinAPI.Services
 {
